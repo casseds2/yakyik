@@ -2,4 +2,4 @@ public/build/
 bin
 node_modules
 package.json
-
+.idea
