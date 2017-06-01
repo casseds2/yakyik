@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Zone from '../presentation/Zone'
+import superagent from 'superagent'
 
 class Zones extends Component{
 
@@ -9,18 +10,31 @@ class Zones extends Component{
 
             zone: {
               name: '',
-              zipCodes: [],
+              zipCode: '',
               timestamp: ''
             },
 
-            list: [
-                {name:'Zone 1', zipCode: '1001', numComments:11},
-                {name:'Zone 2', zipCode: '1002', numComments:12},
-                {name:'Zone 3', zipCode: '1003', numComments:13},
-                {name:'Zone 4', zipCode: '1004', numComments:14},
-                {name:'Zone 5', zipCode: '1005', numComments:15}
-            ]
+            list: []
         }
+    }
+
+    componentDidMount(){
+        console.log('componentDidMount: ')
+        superagent
+            .get('/api/zone')
+            .query(null)
+            .set('Accept', 'application/json')
+            .end((err, response) => {
+                if(err){
+                    alert('ERROR: ' + err)
+                    return
+                }
+                console.log(JSON.stringify(response.body))
+                let results = response.body.results
+                this.setState({
+                    list: results
+                })
+            })
     }
 
     submitZone(){
@@ -44,7 +58,7 @@ class Zones extends Component{
     updateZipCode(event){
         console.log('updateZipCode: ' + event.target.value)
         let updatedZone = Object.assign({}, this.state.zone)
-        updatedZone['zipCodes'] = event.target.value
+        updatedZone['zipCode'] = event.target.value
         this.setState({
             zone: updatedZone
         })
@@ -66,7 +80,7 @@ class Zones extends Component{
 
                 <input onChange={this.updateName.bind(this)} className="form-control" type="text" placeholder="Zone Name"/>
                 <br/>
-                <input onChange={this.updateZipCode.bind(this)} className="form-control" type="text" placeholder="Zip Code(s)"/>
+                <input onChange={this.updateZipCode.bind(this)} className="form-control" type="text" placeholder="Zip Code"/>
                 <br/>
                 <button onClick={this.submitZone.bind(this)} className="btn btn-danger">Submit Zone</button>
 

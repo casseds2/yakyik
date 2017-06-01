@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Comment from '../presentation/Comment'
 import styles from './styles'
+import superagent from 'superagent'
 
 class Comments extends Component{
 
@@ -13,12 +14,27 @@ class Comments extends Component{
                 timestamp: ''
             },
             list: [
-                //{body:'comment 1', username: 'stephen', timestamp:'10:30'},
-                //{body:'comment 2', username: 'patrick', timestamp:'10:35'},
-                //{body:'comment 3', username: 'joseph', timestamp:'10:40'},
-                //{body:'comment 4', username: 'cassedy', timestamp:'10:45'}
             ]
         }
+    }
+
+    componentDidMount(){
+        console.log('componentDidMount: ')
+        superagent
+            .get('/api/comment')
+            .query(null)
+            .set('Accept', 'application/json')
+            .end((err, response) => {
+                if(err){
+                    alert('ERROR: ' + err)
+                    return
+                }
+                console.log(JSON.stringify(response.body))
+                let results = response.body.results
+                this.setState({
+                    list: results
+                })
+            })
     }
 
     submitComment(){
