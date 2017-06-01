@@ -1,5 +1,4 @@
 public/build/
-bin
-node_modules
-package.json
-
+/node_modules/
+/bin/
+.idea
