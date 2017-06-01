@@ -421,7 +421,7 @@
       <workItem from="1496155542245" duration="6351000" />
       <workItem from="1496162845356" duration="3948000" />
       <workItem from="1496238083366" duration="23193000" />
-      <workItem from="1496317443959" duration="49000" />
+      <workItem from="1496317443959" duration="150000" />
     </task>
     <task id="LOCAL-00001" summary="First React Module">
       <created>1496158051383</created>
@@ -448,7 +448,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59227000" />
+    <option name="totallyTimeSpent" value="59328000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="793" y="0" width="814" height="867" extended-state="0" />
