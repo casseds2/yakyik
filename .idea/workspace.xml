@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e56cb710-fb42-4ebc-8512-816304269900" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/containers/Comments.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/containers/Zones.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/containers/styles.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/layout/Home.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/layout/styles.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/presentation/Comment.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/presentation/Zone.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/components/presentation/styles.js" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/components/Zone.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/components/Zones.js" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/build/bundle.js" afterPath="$PROJECT_DIR$/public/build/bundle.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/build/bundle.map" afterPath="$PROJECT_DIR$/public/build/bundle.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/stylesheets/style.css" afterPath="$PROJECT_DIR$/public/stylesheets/style.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/app.js" afterPath="$PROJECT_DIR$/src/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/index.hjs" afterPath="$PROJECT_DIR$/views/index.hjs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webpack.config.js" afterPath="$PROJECT_DIR$/webpack.config.js" />
     </list>
     <list id="8cc50df8-f9eb-4639-bbc5-fa5fb8d572f8" name="New changelist" comment="" />
     <ignored path="yakyik.iws" />
@@ -72,7 +54,7 @@
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="34">
-              <caret line="2" column="5" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="5" />
+              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -421,7 +403,7 @@
       <workItem from="1496155542245" duration="6351000" />
       <workItem from="1496162845356" duration="3948000" />
       <workItem from="1496238083366" duration="23193000" />
-      <workItem from="1496317443959" duration="150000" />
+      <workItem from="1496317443959" duration="368000" />
     </task>
     <task id="LOCAL-00001" summary="First React Module">
       <created>1496158051383</created>
@@ -448,7 +430,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59328000" />
+    <option name="totallyTimeSpent" value="59546000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="793" y="0" width="814" height="867" extended-state="0" />
@@ -816,7 +798,7 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
-          <caret line="2" column="5" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="5" />
+          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding />
         </state>
       </provider>
