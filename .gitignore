@@ -1,3 +1,9 @@
 /node_modules/
-/tutorials/
+.env
+public/build/
+bin
+node_modules
+package.json
 .idea
+public/images/
+public/javascripts/

@@ -23,6 +23,16 @@ module.exports = {
     },
 
     create: function (params, callback) {
+        var zips = params['zipCodes']
+        var zip = zips.split(',')
+        var newZips = []
+        /*Cycle Through and Negate Edge Cases - Zips Must be 5*/
+        zip.forEach(function (zipCode) {
+            newZips.push(zipCode.trim())
+        })
+
+        params['zipCodes'] = newZips
+
         Zone.create(params, function(err, zone){
             if(err){
                 callback(err, null)
