@@ -21,11 +21,17 @@ class CreateZone extends Component{
         })
     }
 
-    submitZone(event){
+    submitZone(event) {
         console.log('SubmitZone: ' + JSON.stringify(this.state.zone))
         let updatedZone = Object.assign({}, this.state.zone)
         updatedZone['zipCodes'] = updatedZone.zipCode.split(',')
-        this.props.onCreate(updatedZone)
+        if (this.state.zone.name != '' && this.state.zone.zipCode != '') {
+            this.props.onCreate(updatedZone)
+        }
+        else{
+            alert('Enter a Name and Zip Code')
+            return
+        }
     }
 
     render(){
