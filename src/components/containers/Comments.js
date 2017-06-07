@@ -10,37 +10,48 @@ class Comments extends Component{
     constructor(){
         super()
         this.state = {
-            list: []
         }
     }
 
-    componentDidMount(){
-        console.log('Comments componentDidMount: ')
-        APIManager.get('/api/comment', null, (err, response) => {
+    /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
+    componentDidUpdate(){
+        console.log('Comments Container: componentDidUpdate')
+        let zone = this.props.zones[this.props.index]
+        if(zone == null){
+            console.log('NO SELECTED ZONE')
+            return
+        }
+        //Stop Duplicate Downloads of Comments from API
+        //If the Key List At the Current Key is Not Null, it Has Already Been Downloaded
+        let commentsArray = this.props.commentsMap[zone._id]
+        if(commentsArray != null){
+            return
+        }
+        APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
             if(err){
                 alert('ERROR: ' + err.message)
                 return
             }
-            //console.log('RESULTS: ' + JSON.stringify(response.results))
-            // this.setState({
-            //     list: response.results
-            // })
+            let comments = response.results
+            this.props.commentsReceived(comments, zone)
         })
     }
 
     submitComment(comment){
-        console.log('submitComment: ' + JSON.stringify(comment))
-        //let updatedComment = Object.assign({}, comment)
-        APIManager.post('/api/comment', comment, (err, response) => {
+        let updatedComment = Object.assign({}, comment)
+        //Assign Zone Property of Currently Selected Zone
+        let zone = this.props.zones[this.props.index]
+        updatedComment['zone'] = zone._id
+        console.log('submitComment: ' + JSON.stringify(updatedComment))
+        APIManager.post('/api/comment', updatedComment, (err, response) => {
             if(err){
                 alert('ERROR: ' + err.message)
                 return
             }
-            let updatedList = Object.assign([], this.state.list)
-            updatedList.push(response.results)
-            this.setState({
-                list: updatedList
-            })
+            let updatedComment = response.results
+            this.props.commentCreated(updatedComment)
+            //Could also use this approach, re-uses code and is elegant
+            //this.props.commentsReceived([updatedComment], zone)
         })
     }
 
@@ -54,24 +65,28 @@ class Comments extends Component{
     }
 
     render(){
+        const selectedZone = this.props.zones[this.props.index]
+        let zoneName = null
+        let commentList = null
+        if(selectedZone != null) {
+            zoneName = selectedZone.name
+            let zoneComments = this.props.commentsMap[selectedZone._id]
+            if (zoneComments != null) {
+                commentList = zoneComments.map((comment, i) => {
+                    return (
+                        <li key={i}><Comment currentComment={comment}/></li>
+                    )
+                })
+            }
+        }
 
         const commentsStyle = styles.comment
-
-        const listItems = this.state.list.map((comment, i) => {
-            return (
-                <li key={i}><Comment currentComment={comment}/></li>
-            )
-        })
-
-        const selectedZone = this.props.zones[this.props.index]
-        const zoneName = (selectedZone==null) ? '' : selectedZone.name
-
         return(
             <div>
                 <h2> {zoneName} </h2>
                 <div style={commentsStyle.commentsBox}>
                     <ul style={commentsStyle.commentsList}>
-                        {listItems}
+                        {commentList}
                     </ul>
                     <CreateComment onCreate={this.submitComment.bind(this)}/>
                 </div>
@@ -83,16 +98,18 @@ class Comments extends Component{
 /*State Variables To Properties*/
 const stateToProps = (state) => { //state may also be known as store...convention to call state
     return{
-        comments: state.comment.list,
+        commentsMap: state.comment.map,
+        commentsLoaded: state.comment.commentsLoaded,
         index: state.zone.selectedZone,
         zones: state.zone.list
     }
 }
 
-/*Store Variables To properties*/
+/*Store Variables To Properties*/
 const dispatchToProps = (dispatch) => {
     return{
-        commentsReceived: (comments) => dispatch(actions.commentsReceived(comments))
+        commentsReceived: (comments, zone) => dispatch(actions.commentsReceived(comments, zone)),
+        commentCreated: (comment) => dispatch(actions.commentCreated(comment))
     }
 }
 

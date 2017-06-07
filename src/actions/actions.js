@@ -23,10 +23,18 @@ export default {
         }
     },
 
-    commentsReceived: (comments) => {
+    commentCreated: (comment) => {
+        return{
+            type:constants.COMMENT_CREATED,
+            comment: comment
+        }
+    },
+
+    commentsReceived: (comments, zone) => {
         return{
             type: constants.COMMENTS_RECEIVED,
-            comments: comments
+            comments: comments,
+            zone: zone
         }
     }
 }
