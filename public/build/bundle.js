@@ -11074,13 +11074,7 @@ var _react = __webpack_require__(10);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Zones = __webpack_require__(105);
-
-var _Zones2 = _interopRequireDefault(_Zones);
-
-var _Comments = __webpack_require__(104);
-
-var _Comments2 = _interopRequireDefault(_Comments);
+var _containers = __webpack_require__(255);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11111,12 +11105,13 @@ var Home = function (_Component) {
                     _react2.default.createElement(
                         'div',
                         { className: 'col-md-4' },
-                        _react2.default.createElement(_Zones2.default, null)
+                        _react2.default.createElement(_containers.Account, null),
+                        _react2.default.createElement(_containers.Zones, null)
                     ),
                     _react2.default.createElement(
                         'div',
                         { className: 'col-md-8' },
-                        _react2.default.createElement(_Comments2.default, null)
+                        _react2.default.createElement(_containers.Comments, null)
                     )
                 )
             );
@@ -11296,44 +11291,58 @@ var Comments = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (Comments.__proto__ || Object.getPrototypeOf(Comments)).call(this));
 
-        _this.state = {
-            list: []
-        };
+        _this.state = {};
         return _this;
     }
 
+    /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
+
+
     _createClass(Comments, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            console.log('Comments componentDidMount: ');
-            _utils.APIManager.get('/api/comment', null, function (err, response) {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            var _this2 = this;
+
+            console.log('Comments Container: componentDidUpdate');
+            var zone = this.props.zones[this.props.index];
+            if (zone == null) {
+                console.log('NO SELECTED ZONE');
+                return;
+            }
+            //Stop Duplicate Downloads of Comments from API
+            //If the Key List At the Current Key is Not Null, it Has Already Been Downloaded
+            var commentsArray = this.props.commentsMap[zone._id];
+            if (commentsArray != null) {
+                return;
+            }
+            _utils.APIManager.get('/api/comment', { zone: zone._id }, function (err, response) {
                 if (err) {
                     alert('ERROR: ' + err.message);
                     return;
                 }
-                //console.log('RESULTS: ' + JSON.stringify(response.results))
-                // this.setState({
-                //     list: response.results
-                // })
+                var comments = response.results;
+                _this2.props.commentsReceived(comments, zone);
             });
         }
     }, {
         key: 'submitComment',
         value: function submitComment(comment) {
-            var _this2 = this;
+            var _this3 = this;
 
-            console.log('submitComment: ' + JSON.stringify(comment));
-            //let updatedComment = Object.assign({}, comment)
-            _utils.APIManager.post('/api/comment', comment, function (err, response) {
+            var updatedComment = Object.assign({}, comment);
+            //Assign Zone Property of Currently Selected Zone
+            var zone = this.props.zones[this.props.index];
+            updatedComment['zone'] = zone._id;
+            console.log('submitComment: ' + JSON.stringify(updatedComment));
+            _utils.APIManager.post('/api/comment', updatedComment, function (err, response) {
                 if (err) {
                     alert('ERROR: ' + err.message);
                     return;
                 }
-                var updatedList = Object.assign([], _this2.state.list);
-                updatedList.push(response.results);
-                _this2.setState({
-                    list: updatedList
-                });
+                var updatedComment = response.results;
+                _this3.props.commentCreated(updatedComment);
+                //Could also use this approach, re-uses code and is elegant
+                //this.props.commentsReceived([updatedComment], zone)
             });
         }
     }, {
@@ -11349,20 +11358,24 @@ var Comments = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
+            var selectedZone = this.props.zones[this.props.index];
+            var zoneName = null;
+            var commentList = null;
+            if (selectedZone != null) {
+                zoneName = selectedZone.name;
+                var zoneComments = this.props.commentsMap[selectedZone._id];
+                if (zoneComments != null) {
+                    commentList = zoneComments.map(function (comment, i) {
+                        return _react2.default.createElement(
+                            'li',
+                            { key: i },
+                            _react2.default.createElement(_presentation.Comment, { currentComment: comment })
+                        );
+                    });
+                }
+            }
 
             var commentsStyle = _styles2.default.comment;
-
-            var listItems = this.state.list.map(function (comment, i) {
-                return _react2.default.createElement(
-                    'li',
-                    { key: i },
-                    _react2.default.createElement(_presentation.Comment, { currentComment: comment })
-                );
-            });
-
-            var selectedZone = this.props.zones[this.props.index];
-            var zoneName = selectedZone == null ? '' : selectedZone.name;
-
             return _react2.default.createElement(
                 'div',
                 null,
@@ -11379,7 +11392,7 @@ var Comments = function (_Component) {
                     _react2.default.createElement(
                         'ul',
                         { style: commentsStyle.commentsList },
-                        listItems
+                        commentList
                     ),
                     _react2.default.createElement(_presentation.CreateComment, { onCreate: this.submitComment.bind(this) })
                 )
@@ -11396,17 +11409,21 @@ var Comments = function (_Component) {
 var stateToProps = function stateToProps(state) {
     //state may also be known as store...convention to call state
     return {
-        comments: state.comment.list,
+        commentsMap: state.comment.map,
+        commentsLoaded: state.comment.commentsLoaded,
         index: state.zone.selectedZone,
         zones: state.zone.list
     };
 };
 
-/*Store Variables To properties*/
+/*Store Variables To Properties*/
 var dispatchToProps = function dispatchToProps(dispatch) {
     return {
-        commentsReceived: function commentsReceived(comments) {
-            return dispatch(_actions.actions.commentsReceived(comments));
+        commentsReceived: function commentsReceived(comments, zone) {
+            return dispatch(_actions.actions.commentsReceived(comments, zone));
+        },
+        commentCreated: function commentCreated(comment) {
+            return dispatch(_actions.actions.commentCreated(comment));
         }
     };
 };
@@ -27447,7 +27464,8 @@ exports.default = {
     ZONE_CREATED: 'ZONE_CREATED',
     SELECTED_ZONE: 'SELECT_ZONE',
 
-    COMMENTS_RECEIVED: 'COMMENTS_RECEIVED'
+    COMMENTS_RECEIVED: 'COMMENTS_RECEIVED',
+    COMMENT_CREATED: 'COMMENT_CREATED'
 
 };
 
@@ -27487,10 +27505,18 @@ exports.default = {
         };
     },
 
-    commentsReceived: function commentsReceived(comments) {
+    commentCreated: function commentCreated(comment) {
+        return {
+            type: _constants.constants.COMMENT_CREATED,
+            comment: comment
+        };
+    },
+
+    commentsReceived: function commentsReceived(comments, zone) {
         return {
             type: _constants.constants.COMMENTS_RECEIVED,
-            comments: comments
+            comments: comments,
+            zone: zone
         };
     }
 };
@@ -27549,20 +27575,48 @@ Object.defineProperty(exports, "__esModule", {
 var _constants = __webpack_require__(252);
 
 var initialState = {
-    list: []
+    map: {}
 };
 
 exports.default = function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
     var action = arguments[1];
 
+
     var updated = Object.assign({}, state);
+    var updatedMap = Object.assign([], updated.map);
 
     switch (action.type) {
 
         case _constants.constants.COMMENTS_RECEIVED:
-            updated['list'] = action.comments;
-            console.log('COMMENTS_RECEIVED');
+            var zoneComments = updatedMap[action.zone._id];
+            if (zoneComments == null) {
+                zoneComments = [];
+            } else {
+                zoneComments = Object.assign([], zoneComments);
+            }
+            action.comments.forEach(function (comment, i) {
+                zoneComments.push(comment);
+            });
+            updatedMap[action.zone._id] = zoneComments;
+            updated['map'] = updatedMap;
+            console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated));
+            return updated;
+
+        case _constants.constants.COMMENT_CREATED:
+            console.log('COMMENT_CREATED: ' + JSON.stringify(action.comment));
+            var commentList = updatedMap[action.comment.zone];
+            if (commentList == null) {
+                commentList = [];
+            } else {
+                commentList = Object.assign([], commentList);
+            }
+            commentList.push(action.comment);
+            updatedMap[action.comment.zone] = commentList;
+            updated['map'] = updatedMap;
+            return updated;
+
+        case _constants.constants.SELECTED_ZONE:
             return updated;
 
         default:
@@ -27570,6 +27624,160 @@ exports.default = function () {
 
     }
 };
+
+/***/ }),
+/* 254 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(10);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utils = __webpack_require__(57);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Account = function (_Component) {
+    _inherits(Account, _Component);
+
+    function Account() {
+        _classCallCheck(this, Account);
+
+        var _this = _possibleConstructorReturn(this, (Account.__proto__ || Object.getPrototypeOf(Account)).call(this));
+
+        _this.state = {
+            profile: {
+                username: '',
+                password: ''
+            }
+        };
+        return _this;
+    }
+
+    _createClass(Account, [{
+        key: 'updateProfile',
+        value: function updateProfile(event) {
+            event.preventDefault();
+            //console.log(event.target.id + ' == ' + event.target.value)
+            var updatedProfile = Object.assign({}, this.state.profile);
+            updatedProfile[event.target.id] = event.target.value;
+            this.setState({
+                profile: updatedProfile
+            });
+        }
+    }, {
+        key: 'signup',
+        value: function signup(event) {
+            event.preventDefault();
+            console.log('signup: ' + JSON.stringify(this.state.profile));
+            var username = this.state.profile.username;
+            var password = this.state.profile.password;
+            if (username.length == 0) {
+                alert('Please Enter Your Username');
+                return;
+            }
+            if (password.length == 0) {
+                alert('Please Enter a Password');
+                return;
+            }
+
+            _utils.APIManager.post('/api/profile', this.state.profile, function (err, response) {
+                if (err) {
+                    alert(err.message);
+                    return;
+                }
+                console.log(JSON.stringify(response));
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                null,
+                _react2.default.createElement(
+                    'h2',
+                    null,
+                    'Login'
+                ),
+                _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement(
+                    'button',
+                    null,
+                    'Log In'
+                ),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement(
+                    'h2',
+                    null,
+                    'Sign Up'
+                ),
+                _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement(
+                    'button',
+                    { onClick: this.signup.bind(this) },
+                    'Join'
+                ),
+                _react2.default.createElement('br', null)
+            );
+        }
+    }]);
+
+    return Account;
+}(_react.Component);
+
+exports.default = Account;
+
+/***/ }),
+/* 255 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Zones = exports.Comments = exports.Account = undefined;
+
+var _Account = __webpack_require__(254);
+
+var _Account2 = _interopRequireDefault(_Account);
+
+var _Comments = __webpack_require__(104);
+
+var _Comments2 = _interopRequireDefault(_Comments);
+
+var _Zones = __webpack_require__(105);
+
+var _Zones2 = _interopRequireDefault(_Zones);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.Account = _Account2.default;
+exports.Comments = _Comments2.default;
+exports.Zones = _Zones2.default;
 
 /***/ })
 /******/ ]);
