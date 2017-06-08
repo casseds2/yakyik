@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
-import { zoneReducer, commentReducer } from '../reducers'
+import { zoneReducer, commentReducer, accountReducer } from '../reducers'
 
 var store;
 
@@ -9,7 +9,8 @@ export default{
     configureStore: () => {
         const reducers = combineReducers({
             zone: zoneReducer,
-            comment: commentReducer
+            comment: commentReducer,
+            account: accountReducer
         })
 
         store = createStore(

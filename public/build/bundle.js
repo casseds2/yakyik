@@ -12014,7 +12014,7 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.commentReducer = exports.zoneReducer = undefined;
+exports.accountReducer = exports.commentReducer = exports.zoneReducer = undefined;
 
 var _zoneReducer = __webpack_require__(113);
 
@@ -12024,10 +12024,15 @@ var _commentReducer = __webpack_require__(253);
 
 var _commentReducer2 = _interopRequireDefault(_commentReducer);
 
+var _accountReducer = __webpack_require__(256);
+
+var _accountReducer2 = _interopRequireDefault(_accountReducer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.zoneReducer = _zoneReducer2.default;
 exports.commentReducer = _commentReducer2.default;
+exports.accountReducer = _accountReducer2.default;
 
 /***/ }),
 /* 113 */
@@ -12107,7 +12112,8 @@ exports.default = {
     configureStore: function configureStore() {
         var reducers = (0, _redux.combineReducers)({
             zone: _reducers.zoneReducer,
-            comment: _reducers.commentReducer
+            comment: _reducers.commentReducer,
+            account: _reducers.accountReducer
         });
 
         store = (0, _redux.createStore)(reducers, (0, _redux.applyMiddleware)(_reduxThunk2.default));
@@ -27465,7 +27471,11 @@ exports.default = {
     SELECTED_ZONE: 'SELECT_ZONE',
 
     COMMENTS_RECEIVED: 'COMMENTS_RECEIVED',
-    COMMENT_CREATED: 'COMMENT_CREATED'
+    COMMENT_CREATED: 'COMMENT_CREATED',
+
+    ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+    ACCOUNT_LOGIN: 'ACCOUNT_LOGIN',
+    ACCOUNT_LOGOUT: 'ACCOUNT_LOGOUT'
 
 };
 
@@ -27670,21 +27680,10 @@ var Account = function (_Component) {
     }
 
     _createClass(Account, [{
-        key: 'updateProfile',
-        value: function updateProfile(event) {
+        key: 'login',
+        value: function login(event) {
             event.preventDefault();
-            //console.log(event.target.id + ' == ' + event.target.value)
-            var updatedProfile = Object.assign({}, this.state.profile);
-            updatedProfile[event.target.id] = event.target.value;
-            this.setState({
-                profile: updatedProfile
-            });
-        }
-    }, {
-        key: 'signup',
-        value: function signup(event) {
-            event.preventDefault();
-            console.log('signup: ' + JSON.stringify(this.state.profile));
+            console.log('login: ' + JSON.stringify(this.state.profile));
             var username = this.state.profile.username;
             var password = this.state.profile.password;
             if (username.length == 0) {
@@ -27696,7 +27695,42 @@ var Account = function (_Component) {
                 return;
             }
 
-            _utils.APIManager.post('/api/profile', this.state.profile, function (err, response) {
+            _utils.APIManager.post('/account/login', this.state.profile, function (err, response) {
+                if (err) {
+                    alert(err.message);
+                    return;
+                }
+                console.log(JSON.stringify(response));
+            });
+        }
+    }, {
+        key: 'updateProfile',
+        value: function updateProfile(event) {
+            event.preventDefault();
+            //console.log(event.target.id + ' == ' + event.target.value)
+            var updatedProfile = Object.assign({}, this.state.profile);
+            updatedProfile[event.target.id] = event.target.value;
+            this.setState({
+                profile: updatedProfile
+            });
+        }
+    }, {
+        key: 'register',
+        value: function register(event) {
+            event.preventDefault();
+            console.log('register: ' + JSON.stringify(this.state.profile));
+            var username = this.state.profile.username;
+            var password = this.state.profile.password;
+            if (username.length == 0) {
+                alert('Please Enter Your Username');
+                return;
+            }
+            if (password.length == 0) {
+                alert('Please Enter a Password');
+                return;
+            }
+
+            _utils.APIManager.post('/account/register', this.state.profile, function (err, response) {
                 if (err) {
                     alert(err.message);
                     return;
@@ -27721,14 +27755,14 @@ var Account = function (_Component) {
                 _react2.default.createElement('br', null),
                 _react2.default.createElement(
                     'button',
-                    null,
+                    { onClick: this.login.bind(this) },
                     'Log In'
                 ),
                 _react2.default.createElement('br', null),
                 _react2.default.createElement(
                     'h2',
                     null,
-                    'Sign Up'
+                    'Register'
                 ),
                 _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
                 _react2.default.createElement('br', null),
@@ -27736,7 +27770,7 @@ var Account = function (_Component) {
                 _react2.default.createElement('br', null),
                 _react2.default.createElement(
                     'button',
-                    { onClick: this.signup.bind(this) },
+                    { onClick: this.register.bind(this) },
                     'Join'
                 ),
                 _react2.default.createElement('br', null)
@@ -27778,6 +27812,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.Account = _Account2.default;
 exports.Comments = _Comments2.default;
 exports.Zones = _Zones2.default;
+
+/***/ }),
+/* 256 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _constants = __webpack_require__(252);
+
+var initialState = {};
+
+exports.default = function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments[1];
+
+
+    var updated = Object.assign({}, state);
+
+    switch (action.type) {
+
+        default:
+            return state;
+    }
+};
 
 /***/ })
 /******/ ]);
