@@ -38,10 +38,15 @@ class Comments extends Component{
     }
 
     submitComment(comment){
+        if(this.props.user == null){
+            alert('Please Sign Up or Log In To Comment')
+            return
+        }
         let updatedComment = Object.assign({}, comment)
         //Assign Zone Property of Currently Selected Zone
         let zone = this.props.zones[this.props.index]
         updatedComment['zone'] = zone._id
+        updatedComment['username'] = this.props.user.username
         console.log('submitComment: ' + JSON.stringify(updatedComment))
         APIManager.post('/api/comment', updatedComment, (err, response) => {
             if(err){
@@ -101,7 +106,8 @@ const stateToProps = (state) => { //state may also be known as store...conventio
         commentsMap: state.comment.map,
         commentsLoaded: state.comment.commentsLoaded,
         index: state.zone.selectedZone,
-        zones: state.zone.list
+        zones: state.zone.list,
+        user: state.account.user
     }
 }
 
