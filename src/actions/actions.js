@@ -36,5 +36,12 @@ export default {
             comments: comments,
             zone: zone
         }
+    },
+
+    currentUserReceived: (user) => {
+        return{
+            type: constants.CURRENT_USER_RECEIVED,
+            user: user
+        }
     }
 }

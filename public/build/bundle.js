@@ -11303,7 +11303,7 @@ var Comments = function (_Component) {
         value: function componentDidUpdate() {
             var _this2 = this;
 
-            console.log('Comments Container: componentDidUpdate');
+            //console.log('Comments Container: componentDidUpdate')
             var zone = this.props.zones[this.props.index];
             if (zone == null) {
                 console.log('NO SELECTED ZONE');
@@ -11480,7 +11480,7 @@ var Zones = function (_Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            console.log('Zones componentDidMount: ');
+            //console.log('Zones componentDidMount: ')
             _utils.APIManager.get('/api/zone', null, function (err, response) {
                 if (err) {
                     alert('ERROR: ' + err.message);
@@ -12062,7 +12062,7 @@ exports.default = function () {
     switch (action.type) {
 
         case _constants.constants.ZONES_RECEIVED:
-            console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones));
+            //console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones))
             updated['list'] = action.zones;
             return updated; //this.setState()
 
@@ -27473,9 +27473,7 @@ exports.default = {
     COMMENTS_RECEIVED: 'COMMENTS_RECEIVED',
     COMMENT_CREATED: 'COMMENT_CREATED',
 
-    ACCOUNT_CREATED: 'ACCOUNT_CREATED',
-    ACCOUNT_LOGIN: 'ACCOUNT_LOGIN',
-    ACCOUNT_LOGOUT: 'ACCOUNT_LOGOUT'
+    CURRENT_USER_RECEIVED: 'CURRENT_USER_RECEIVED'
 
 };
 
@@ -27527,6 +27525,13 @@ exports.default = {
             type: _constants.constants.COMMENTS_RECEIVED,
             comments: comments,
             zone: zone
+        };
+    },
+
+    currentUserReceived: function currentUserReceived(user) {
+        return {
+            type: _constants.constants.CURRENT_USER_RECEIVED,
+            user: user
         };
     }
 };
@@ -27610,11 +27615,11 @@ exports.default = function () {
             });
             updatedMap[action.zone._id] = zoneComments;
             updated['map'] = updatedMap;
-            console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated));
+            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
             return updated;
 
         case _constants.constants.COMMENT_CREATED:
-            console.log('COMMENT_CREATED: ' + JSON.stringify(action.comment));
+            //console.log('COMMENT_CREATED: ' + JSON.stringify(action.comment))
             var commentList = updatedMap[action.comment.zone];
             if (commentList == null) {
                 commentList = [];
@@ -27654,6 +27659,10 @@ var _react2 = _interopRequireDefault(_react);
 
 var _utils = __webpack_require__(57);
 
+var _actions = __webpack_require__(251);
+
+var _reactRedux = __webpack_require__(101);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -27680,8 +27689,24 @@ var Account = function (_Component) {
     }
 
     _createClass(Account, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var _this2 = this;
+
+            _utils.APIManager.get('/account/currentuser', null, function (err, response) {
+                if (err) {
+                    //alert(err.message) //Not Logged In Error
+                    return;
+                }
+                console.log('Account Component Did Mount: ' + JSON.stringify(response));
+                _this2.props.currentUserReceived(response.user);
+            });
+        }
+    }, {
         key: 'login',
         value: function login(event) {
+            var _this3 = this;
+
             event.preventDefault();
             console.log('login: ' + JSON.stringify(this.state.profile));
             var username = this.state.profile.username;
@@ -27701,6 +27726,23 @@ var Account = function (_Component) {
                     return;
                 }
                 console.log(JSON.stringify(response));
+                _this3.props.currentUserReceived(response.user); //Updates state which updates container
+            });
+        }
+    }, {
+        key: 'logout',
+        value: function logout(event) {
+            var _this4 = this;
+
+            event.preventDefault();
+            console.log('logout: ');
+            _utils.APIManager.get('/account/logout', null, function (err, response) {
+                if (err) {
+                    alert(err.message);
+                    return;
+                }
+                console.log(JSON.stringify(response));
+                _this4.props.currentUserReceived(null); //Able to reuse this here
             });
         }
     }, {
@@ -27717,6 +27759,8 @@ var Account = function (_Component) {
     }, {
         key: 'register',
         value: function register(event) {
+            var _this5 = this;
+
             event.preventDefault();
             console.log('register: ' + JSON.stringify(this.state.profile));
             var username = this.state.profile.username;
@@ -27736,44 +27780,70 @@ var Account = function (_Component) {
                     return;
                 }
                 console.log(JSON.stringify(response));
+                _this5.props.currentUserReceived(response.user); //Able to reuse this here
             });
         }
     }, {
         key: 'render',
         value: function render() {
+            var content = null;
+            if (this.props.user == null) {
+                content = _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h2',
+                        null,
+                        'Login'
+                    ),
+                    _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.login.bind(this) },
+                        'Log In'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'h2',
+                        null,
+                        'Register'
+                    ),
+                    _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.register.bind(this) },
+                        'Join'
+                    ),
+                    _react2.default.createElement('br', null)
+                );
+            } else {
+                content = _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h2',
+                        null,
+                        'Welcome ',
+                        this.props.user.username,
+                        '!'
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.logout.bind(this) },
+                        'Log Out'
+                    )
+                );
+            }
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(
-                    'h2',
-                    null,
-                    'Login'
-                ),
-                _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement(
-                    'button',
-                    { onClick: this.login.bind(this) },
-                    'Log In'
-                ),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement(
-                    'h2',
-                    null,
-                    'Register'
-                ),
-                _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement(
-                    'button',
-                    { onClick: this.register.bind(this) },
-                    'Join'
-                ),
-                _react2.default.createElement('br', null)
+                content
             );
         }
     }]);
@@ -27781,7 +27851,26 @@ var Account = function (_Component) {
     return Account;
 }(_react.Component);
 
-exports.default = Account;
+/*State Variables To Properties*/
+
+
+var stateToProps = function stateToProps(state) {
+    //state may also be known as store...convention to call state
+    return {
+        user: state.account.user
+    };
+};
+
+/*Store Variables To Properties*/
+var dispatchToProps = function dispatchToProps(dispatch) {
+    return {
+        currentUserReceived: function currentUserReceived(user) {
+            return dispatch(_actions.actions.currentUserReceived(user));
+        }
+    };
+};
+
+exports.default = (0, _reactRedux.connect)(stateToProps, dispatchToProps)(Account);
 
 /***/ }),
 /* 255 */
@@ -27826,7 +27915,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _constants = __webpack_require__(252);
 
-var initialState = {};
+var initialState = {
+    user: null
+};
 
 exports.default = function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
@@ -27836,6 +27927,11 @@ exports.default = function () {
     var updated = Object.assign({}, state);
 
     switch (action.type) {
+
+        case _constants.constants.CURRENT_USER_RECEIVED:
+            console.log('CURRENT_USER_RECEIVED: ' + JSON.stringify(action.user));
+            updated['user'] = action.user;
+            return updated;
 
         default:
             return state;
