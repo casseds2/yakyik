@@ -12,7 +12,7 @@ export default (state = initialState, action) => {
     switch(action.type) {
 
         case constants.ZONES_RECEIVED:
-            console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones))
+            //console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones))
             updated['list'] = action.zones
             return updated //this.setState()
 

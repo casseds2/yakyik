@@ -13,7 +13,7 @@ class Zones extends Component{
     }
 
     componentDidMount(){
-        console.log('Zones componentDidMount: ')
+        //console.log('Zones componentDidMount: ')
         APIManager.get('/api/zone', null, (err, response) => {
             if(err){
                 alert('ERROR: ' + err.message)

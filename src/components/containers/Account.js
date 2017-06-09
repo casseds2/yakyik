@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { APIManager } from '../../utils'
+import { actions } from '../../actions'
+import { connect } from 'react-redux'
 
 class Account extends Component{
 
@@ -11,6 +13,17 @@ class Account extends Component{
                 password: ''
             }
         }
+    }
+
+    componentDidMount(){
+        APIManager.get('/account/currentuser', null, (err, response) => {
+            if(err){
+                //alert(err.message) //Not Logged In Error
+                return
+            }
+            console.log('Account Component Did Mount: ' + JSON.stringify(response))
+            this.props.currentUserReceived(response.user)
+        })
     }
 
     login(event){
@@ -33,6 +46,20 @@ class Account extends Component{
                 return
             }
             console.log(JSON.stringify(response))
+            this.props.currentUserReceived(response.user) //Updates state which updates container
+        })
+    }
+
+    logout(event){
+        event.preventDefault()
+        console.log('logout: ')
+        APIManager.get('/account/logout', null, (err, response) => {
+            if(err){
+                alert(err.message)
+                return
+            }
+            console.log(JSON.stringify(response))
+            this.props.currentUserReceived(null) //Able to reuse this here
         })
     }
 
@@ -66,12 +93,15 @@ class Account extends Component{
                 return
             }
             console.log(JSON.stringify(response))
+            this.props.currentUserReceived(response.user) //Able to reuse this here
         })
     }
 
     render(){
-        return(
-            <div>
+        let content = null
+        if(this.props.user == null){
+            content =
+                <div>
                 <h2>Login</h2>
                 <input id="username" onChange={this.updateProfile.bind(this)} type="text" placeholder="username"/><br/>
                 <input id="password" onChange={this.updateProfile.bind(this)} type="password" placeholder="password"/><br/>
@@ -83,8 +113,35 @@ class Account extends Component{
                 <button onClick={this.register.bind(this)}>Join</button>
                 <br/>
             </div>
+        }
+        else{
+            content = (
+                <div>
+                    <h2>Welcome {this.props.user.username}!</h2>
+                    <button onClick={this.logout.bind(this)}>Log Out</button>
+                </div>
+            )
+        }
+        return(
+            <div>
+                { content }
+            </div>
         )
     }
 }
 
-export default Account
+/*State Variables To Properties*/
+const stateToProps = (state) => { //state may also be known as store...convention to call state
+    return{
+        user: state.account.user
+    }
+}
+
+/*Store Variables To Properties*/
+const dispatchToProps = (dispatch) => {
+    return{
+        currentUserReceived: (user) => dispatch(actions.currentUserReceived(user))
+    }
+}
+
+export default connect(stateToProps, dispatchToProps) (Account)

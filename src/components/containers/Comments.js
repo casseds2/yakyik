@@ -15,7 +15,7 @@ class Comments extends Component{
 
     /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
     componentDidUpdate(){
-        console.log('Comments Container: componentDidUpdate')
+        //console.log('Comments Container: componentDidUpdate')
         let zone = this.props.zones[this.props.index]
         if(zone == null){
             console.log('NO SELECTED ZONE')

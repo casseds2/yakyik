@@ -24,11 +24,11 @@ export default (state = initialState, action) => {
             })
             updatedMap[action.zone._id] = zoneComments
             updated['map'] = updatedMap
-            console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
+            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
             return updated
 
         case constants.COMMENT_CREATED:
-            console.log('COMMENT_CREATED: ' + JSON.stringify(action.comment))
+            //console.log('COMMENT_CREATED: ' + JSON.stringify(action.comment))
             let commentList = updatedMap[action.comment.zone]
             if(commentList == null){
                 commentList = []
