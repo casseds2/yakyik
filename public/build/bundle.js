@@ -11757,7 +11757,8 @@ exports.default = {
         var reducers = (0, _redux.combineReducers)({
             zone: _reducers.zoneReducer,
             comment: _reducers.commentReducer,
-            account: _reducers.accountReducer
+            account: _reducers.accountReducer,
+            profile: _reducers.profileReducer
         });
 
         store = (0, _redux.createStore)(reducers, (0, _redux.applyMiddleware)(_reduxThunk2.default));
@@ -11906,6 +11907,13 @@ exports.default = {
             type: _constants.constants.CURRENT_USER_RECEIVED,
             user: user
         };
+    },
+
+    profileReceived: function profileReceived(profile) {
+        return {
+            type: _constants.constants.PROFILE_RECEIVED,
+            profile: profile
+        };
     }
 };
 
@@ -11995,7 +12003,9 @@ var Account = function (_Component) {
         _this.state = {
             profile: {
                 username: '',
-                password: ''
+                password: '',
+                city: '',
+                gender: ''
             }
         };
         return _this;
@@ -12062,7 +12072,7 @@ var Account = function (_Component) {
         key: 'updateProfile',
         value: function updateProfile(event) {
             event.preventDefault();
-            //console.log(event.target.id + ' == ' + event.target.value)
+            console.log(event.target.id + ' == ' + event.target.value);
             var updatedProfile = Object.assign({}, this.state.profile);
             updatedProfile[event.target.id] = event.target.value;
             this.setState({
@@ -12078,12 +12088,22 @@ var Account = function (_Component) {
             console.log('register: ' + JSON.stringify(this.state.profile));
             var username = this.state.profile.username;
             var password = this.state.profile.password;
+            var city = this.state.profile.city;
+            var gender = this.state.profile.gender;
             if (username.length == 0) {
                 alert('Please Enter Your Username');
                 return;
             }
             if (password.length == 0) {
                 alert('Please Enter a Password');
+                return;
+            }
+            if (city.length == 0) {
+                alert('Please Enter a City');
+                return;
+            }
+            if (gender.length == 0) {
+                alert('Please Enter a Gender');
                 return;
             }
 
@@ -12127,6 +12147,10 @@ var Account = function (_Component) {
                     _react2.default.createElement('input', { id: 'username', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'username' }),
                     _react2.default.createElement('br', null),
                     _react2.default.createElement('input', { id: 'password', onChange: this.updateProfile.bind(this), type: 'password', placeholder: 'password' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('input', { id: 'city', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'city' }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('input', { id: 'gender', onChange: this.updateProfile.bind(this), type: 'text', placeholder: 'gender' }),
                     _react2.default.createElement('br', null),
                     _react2.default.createElement(
                         'button',
@@ -13136,7 +13160,9 @@ exports.default = {
     COMMENTS_RECEIVED: 'COMMENTS_RECEIVED',
     COMMENT_CREATED: 'COMMENT_CREATED',
 
-    CURRENT_USER_RECEIVED: 'CURRENT_USER_RECEIVED'
+    CURRENT_USER_RECEIVED: 'CURRENT_USER_RECEIVED',
+
+    PROFILE_RECEIVED: 'PROFILE_RECEIVED'
 
 };
 
@@ -13250,7 +13276,7 @@ exports.default = function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.accountReducer = exports.commentReducer = exports.zoneReducer = undefined;
+exports.profileReducer = exports.accountReducer = exports.commentReducer = exports.zoneReducer = undefined;
 
 var _zoneReducer = __webpack_require__(131);
 
@@ -13264,11 +13290,16 @@ var _accountReducer = __webpack_require__(128);
 
 var _accountReducer2 = _interopRequireDefault(_accountReducer);
 
+var _profileReducer = __webpack_require__(294);
+
+var _profileReducer2 = _interopRequireDefault(_profileReducer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.zoneReducer = _zoneReducer2.default;
 exports.commentReducer = _commentReducer2.default;
 exports.accountReducer = _accountReducer2.default;
+exports.profileReducer = _profileReducer2.default;
 
 /***/ }),
 /* 131 */
@@ -31130,6 +31161,10 @@ var _react2 = _interopRequireDefault(_react);
 
 var _utils = __webpack_require__(38);
 
+var _actions = __webpack_require__(37);
+
+var _reactRedux = __webpack_require__(28);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -31146,9 +31181,7 @@ var Profile = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this));
 
-        _this.state = {
-            profile: null
-        };
+        _this.state = {};
         return _this;
     }
 
@@ -31168,33 +31201,110 @@ var Profile = function (_Component) {
                     return;
                 }
                 var profile = response.results[0];
-                console.log('received Profile: ' + JSON.stringify(profile));
-                _this2.setState({
-                    profile: profile
-                });
+                //console.log('received Profile: ' + JSON.stringify(profile))
+                _this2.props.profileReceived(profile);
             });
         }
     }, {
         key: 'render',
         value: function render() {
+            var profile = null;
+            for (var i = 0; i < this.props.profiles.length; i++) {
+                if (this.props.profiles[i].username == this.props.username) {
+                    profile = this.props.profiles[i];
+                    break;
+                }
+            }
 
-            var header = this.state.profile == null ? null : _react2.default.createElement(
-                'h3',
-                null,
-                this.state.profile._id
-            );
-            return _react2.default.createElement(
-                'div',
-                null,
-                header
-            );
+            var header = null;
+            if (profile != null) {
+                header = _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h3',
+                        null,
+                        profile.username
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'gender: ',
+                        profile.gender,
+                        ' ',
+                        _react2.default.createElement('br', null),
+                        'city: ',
+                        profile.city,
+                        ' ',
+                        _react2.default.createElement('br', null)
+                    )
+                );
+            }
+            return header;
         }
     }]);
 
     return Profile;
 }(_react.Component);
 
-exports.default = Profile;
+/*State Variables To Properties*/
+
+
+var stateToProps = function stateToProps(state) {
+    //state may also be known as store...convention to call state
+    return {
+        profiles: state.profile.list
+    };
+};
+
+/*Store Variables To Properties*/
+var dispatchToProps = function dispatchToProps(dispatch) {
+    return {
+        profileReceived: function profileReceived(profile) {
+            return dispatch(_actions.actions.profileReceived(profile));
+        }
+    };
+};
+
+exports.default = (0, _reactRedux.connect)(stateToProps, dispatchToProps)(Profile);
+
+/***/ }),
+/* 294 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _constants = __webpack_require__(29);
+
+var initialState = {
+    list: []
+};
+
+exports.default = function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments[1];
+
+
+    var updated = Object.assign({}, state);
+    var updatedList = Object.assign([], updated.list);
+
+    switch (action.type) {
+
+        case _constants.constants.PROFILE_RECEIVED:
+            console.log('PROFILE_RECEIVED: ' + JSON.stringify(action.profile));
+            updatedList.push(action.profile);
+            updated['list'] = updatedList;
+            return updated;
+
+        default:
+            return state;
+    }
+};
 
 /***/ })
 /******/ ]);
