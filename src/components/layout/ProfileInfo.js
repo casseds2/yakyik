@@ -3,10 +3,6 @@ import { Profile } from '../containers'
 
 class ProfileInfo extends Component{
 
-    componentDidMount(){
-        console.log('componentDidMount: ' + JSON.stringify(this.props.match.params))
-    }
-
     render(){
 
         return(

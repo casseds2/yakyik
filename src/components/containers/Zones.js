@@ -14,15 +14,7 @@ class Zones extends Component{
 
     componentDidMount(){
         //console.log('Zones componentDidMount: ')
-        APIManager.get('/api/zone', null, (err, response) => {
-            if(err){
-                alert('ERROR: ' + err.message)
-                return
-            }
-            //Dispatch An Action
-            const zones = response.results
-            this.props.zonesReceived(zones)
-        })
+        this.props.fetchZones(null)
     }
 
     submitZone(zone){
@@ -54,12 +46,24 @@ class Zones extends Component{
             )
         })
 
+        let content = null
+        if(this.props.appStatus == 'loading'){
+            content = 'LOADING...'
+        }
+        else{
+            content = (
+                <div>
+                    <ol>
+                        {listItems}
+                    </ol>
+                    <CreateZone onCreate={this.submitZone.bind(this)}/>
+                </div>
+            )
+        }
+
         return(
             <div>
-                <ol>
-                    {listItems}
-                </ol>
-                <CreateZone onCreate={this.submitZone.bind(this)}/>
+                { content }
             </div>
         )
     }
@@ -70,6 +74,7 @@ class Zones extends Component{
 //This allows us use this.props.list...assigns state to property
 const stateToProps = (state) => { //state here also knows as store
     return{
+        appStatus: state.zone.appStatus,
         list: state.zone.list,
         selected: state.zone.selectedZone
     }
@@ -80,7 +85,8 @@ const dispatchToProps = (dispatch) => {
     return{
         zonesReceived: (zones) => dispatch(actions.zonesReceived(zones)),
         zoneCreated: (zone) => dispatch(actions.zoneCreated(zone)),
-        selectedZone: (index) => dispatch(actions.selectedZone(index))
+        selectedZone: (index) => dispatch(actions.selectedZone(index)),
+        fetchZones: (params) => dispatch(actions.fetchZones(params))
     }
 }
 

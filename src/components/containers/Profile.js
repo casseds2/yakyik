@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { APIManager } from '../../utils'
 import { actions } from '../../actions'
 import { connect } from 'react-redux'
 
@@ -12,31 +11,16 @@ class Profile extends Component{
     }
 
     componentDidMount(){
-        APIManager.get('/api/profile', {username: this.props.username}, (err, response) => {
-            if(err){
-                alert(err.message)
-                return
-            }
-            //console.log('componentDidMount: ' + JSON.stringify(response))
-            if(response.results.length == 0){
-                alert('Profile Not Found.')
-                return
-            }
-            const profile = response.results[0]
-            //console.log('received Profile: ' + JSON.stringify(profile))
-            this.props.profileReceived(profile)
-        })
+        const profile = this.props.profiles[this.props.username] //Taken From The Map
+        if(profile == null) {
+
+            this.props.fetchProfile({username: this.props.username})
+        }
     }
 
     render(){
-        let profile = null
-        for(var i = 0; i < this.props.profiles.length; i++){
-            if(this.props.profiles[i].username == this.props.username){
-                profile = this.props.profiles[i]
-                break
-            }
-        }
 
+        let profile = this.props.profiles[this.props.username]
         let header = null
         if(profile != null){
             header = (
@@ -49,20 +33,27 @@ class Profile extends Component{
                 </div>
             )
         }
-        return header
+        const content = ( this.props.appStatus == 'loading' ) ? 'Loading...' : header
+        return (
+            <div>
+                { content }
+            </div>
+        )
     }
 }
 
 /*State Variables To Properties*/
 const stateToProps = (state) => { //state may also be known as store...convention to call state
     return{
-        profiles: state.profile.list
+        profiles: state.profile.map,
+        appStatus: state.profile.appStatus
     }
 }
 
 /*Store Variables To Properties*/
 const dispatchToProps = (dispatch) => {
     return{
+        fetchProfile: (params) => dispatch(actions.fetchProfile(params)),
         profileReceived: (profile) => dispatch(actions.profileReceived(profile))
     }
 }

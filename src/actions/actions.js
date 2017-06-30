@@ -1,4 +1,5 @@
 import { constants } from '../constants'
+import { APIManager } from '../utils'
 
 export default {
 
@@ -6,6 +7,30 @@ export default {
         return{
             type: constants.ZONES_RECEIVED,
             zones: zones
+        }
+    },
+
+    fetchZones: (params) => {
+        return(dispatch) => {
+
+            dispatch({
+                type: constants.APPLICATION_STATE,
+                status: 'loading'
+            })
+            APIManager.get('/api/zone', params, (err, response) => {
+                if(err){
+                    alert(err)
+                    return
+                }
+                console.log(JSON.stringify(response))
+                const zones = response.results
+                setTimeout(() => {
+                    dispatch({
+                        type: constants.ZONES_RECEIVED,
+                        zones: zones
+                    })
+                }, 3000)
+            })
         }
     },
 
@@ -45,10 +70,38 @@ export default {
         }
     },
 
-    profileReceived: (profile) => {
-        return{
-            type: constants.PROFILE_RECEIVED,
-            profile: profile
+    // profileReceived: (profile) => {
+    //     return{
+    //         type: constants.PROFILE_RECEIVED,
+    //         profile: profile
+    //     }
+    // },
+
+    fetchProfile: (params) => {
+        return (dispatch) => {
+            dispatch({
+                type: constants.APPLICATION_STATE,
+                status: 'loading'
+            })
+            APIManager.get('/api/profile', params, (err, response) => {
+                if(err){
+                    console.log('ERROR: ' + err)
+                    return
+                }
+                //console.log('fetchProfile: ' + JSON.stringify(response))
+                if (response.results.length == 0) {
+                    alert('Profile Not Found.')
+                    return
+                }
+                const profile = response.results[0]
+                //Timeout Simulates Weak Internet Connection
+                setTimeout(() => {
+                    dispatch({
+                        type: constants.PROFILE_RECEIVED,
+                        profile: profile
+                    })
+                }, 3000)
+            })
         }
     }
 }

@@ -23,7 +23,7 @@ class Account extends Component{
                 //alert(err.message) //Not Logged In Error
                 return
             }
-            console.log('Account Component Did Mount: ' + JSON.stringify(response))
+            //console.log('Account Component Did Mount: ' + JSON.stringify(response))
             this.props.currentUserReceived(response.user)
         })
     }

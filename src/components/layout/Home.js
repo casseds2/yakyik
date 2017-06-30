@@ -4,7 +4,6 @@ import { Zones, Comments, Account } from '../containers'
 class Home extends Component{
 
     render(){
-        console.log('Home Component Rendering')
         return(
             <div className="container">
                 <div className="row">
