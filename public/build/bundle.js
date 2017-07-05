@@ -7615,7 +7615,7 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Profile = exports.Zones = exports.Comments = exports.Account = undefined;
+exports.CurrentUser = exports.Profile = exports.Zones = exports.Comments = exports.Account = undefined;
 
 var _Account = __webpack_require__(121);
 
@@ -7633,12 +7633,17 @@ var _Profile = __webpack_require__(123);
 
 var _Profile2 = _interopRequireDefault(_Profile);
 
+var _CurrentUser = __webpack_require__(295);
+
+var _CurrentUser2 = _interopRequireDefault(_CurrentUser);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.Account = _Account2.default;
 exports.Comments = _Comments2.default;
 exports.Zones = _Zones2.default;
 exports.Profile = _Profile2.default;
+exports.CurrentUser = _CurrentUser2.default;
 
 /***/ }),
 /* 71 */
@@ -12300,19 +12305,25 @@ exports.default = {
                 type: _constants.constants.APPLICATION_STATE,
                 status: 'loading'
             });
+
             _utils.APIManager.get('/api/zone', params, function (err, response) {
                 if (err) {
                     alert(err);
                     return;
                 }
-                console.log(JSON.stringify(response));
+                console.log('Action (fetchZones):' + JSON.stringify(response));
                 var zones = response.results;
-                setTimeout(function () {
-                    dispatch({
-                        type: _constants.constants.ZONES_RECEIVED,
-                        zones: zones
-                    });
-                }, 3000);
+                dispatch({
+                    type: _constants.constants.ZONES_RECEIVED,
+                    zones: zones
+                });
+                //Simulate Bad Internet Connection
+                // setTimeout(() => {
+                //     dispatch({
+                //         type: constants.ZONES_RECEIVED,
+                //         zones: zones
+                //     })
+                // }, 3000)
             });
         };
     },
@@ -12371,19 +12382,37 @@ exports.default = {
                     console.log('ERROR: ' + err);
                     return;
                 }
-                //console.log('fetchProfile: ' + JSON.stringify(response))
+                console.log('Action (fetchProfile): ' + JSON.stringify(response));
                 if (response.results.length == 0) {
                     alert('Profile Not Found.');
                     return;
                 }
                 var profile = response.results[0];
                 //Timeout Simulates Weak Internet Connection
-                setTimeout(function () {
-                    dispatch({
-                        type: _constants.constants.PROFILE_RECEIVED,
-                        profile: profile
-                    });
-                }, 3000);
+                // setTimeout(() => {
+                //     dispatch({
+                //         type: constants.PROFILE_RECEIVED,
+                //         profile: profile
+                //     })
+                // }, 3000)
+            });
+        };
+    },
+
+    updateProfile: function updateProfile(profile, updated) {
+        return function (dispatch) {
+            var endpoint = '/api/profile/' + profile._id;
+            _utils.APIManager.put(endpoint, updated, function (err, response) {
+                if (err) {
+                    alert('ERROR: ' + JSON.stringify(err));
+                    return;
+                }
+                var updatedProfile = response.results;
+                dispatch({
+                    type: _constants.constants.PROFILE_UPDATED,
+                    profile: updatedProfile
+                });
+                console.log('Profile Updated: ' + JSON.stringify(response));
             });
         };
     }
@@ -12406,6 +12435,8 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _layout = __webpack_require__(115);
 
+var _containers = __webpack_require__(70);
+
 var _reactRedux = __webpack_require__(24);
 
 var _store = __webpack_require__(116);
@@ -12426,7 +12457,8 @@ var app = _react2.default.createElement(
             'div',
             null,
             _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _layout.Home }),
-            _react2.default.createElement(_reactRouterDom.Route, { path: '/profile/:username', component: _layout.ProfileInfo })
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/profile/:username', component: _layout.ProfileInfo }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/currentuser', component: _containers.CurrentUser })
         )
     )
 );
@@ -12455,6 +12487,8 @@ var _utils = __webpack_require__(34);
 var _actions = __webpack_require__(33);
 
 var _reactRedux = __webpack_require__(24);
+
+var _reactRouterDom = __webpack_require__(68);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -12643,9 +12677,24 @@ var Account = function (_Component) {
                         '!'
                     ),
                     _react2.default.createElement(
+                        'span',
+                        null,
+                        this.props.user.city
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
                         'button',
                         { onClick: this.logout.bind(this) },
                         'Log Out'
+                    ),
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: '/currentuser' },
+                        _react2.default.createElement(
+                            'button',
+                            null,
+                            'Account'
+                        )
                     )
                 );
             }
@@ -13037,6 +13086,7 @@ var Zones = function (_Component) {
         value: function componentDidMount() {
             //console.log('Zones componentDidMount: ')
             this.props.fetchZones(null);
+            //Removed API call from here and put it into actions: fetchZones
         }
     }, {
         key: 'submitZone',
@@ -13715,7 +13765,8 @@ exports.default = {
     CURRENT_USER_RECEIVED: 'CURRENT_USER_RECEIVED',
 
     PROFILE_RECEIVED: 'PROFILE_RECEIVED',
-    APPLICATION_STATE: 'APPLICATION_STATE'
+    APPLICATION_STATE: 'APPLICATION_STATE',
+    PROFILE_UPDATED: 'PROFILE_UPDATED'
 
 };
 
@@ -13748,6 +13799,13 @@ exports.default = function () {
         case _constants.constants.CURRENT_USER_RECEIVED:
             //console.log('CURRENT_USER_RECEIVED: ' + JSON.stringify(action.user))
             updated['user'] = action.user;
+            return updated;
+
+        case _constants.constants.PROFILE_UPDATED:
+            console.log('profileReducer (PROFILE_UPDATED): ' + JSON.stringify(action.profile));
+            //updatedMap[action]
+            if (action.profile._id != updated.user._id) return updated;
+            updated['user'] = action.profile;
             return updated;
 
         default:
@@ -14004,7 +14062,20 @@ exports.default = {
         });
     },
 
-    put: function put() {},
+    put: function put(url, body, callback) {
+        _superagent2.default.put(url).send(body).set('Accept', 'application/JSON').end(function (err, response) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            var confirmation = response.body.confirmation;
+            if (confirmation != 'success') {
+                callback({ message: response.body.message }, null);
+                return;
+            }
+            callback(null, response.body);
+        });
+    },
 
     delete: function _delete() {}
 };
@@ -31362,6 +31433,125 @@ var valueEqual = function valueEqual(a, b) {
 };
 
 exports.default = valueEqual;
+
+/***/ }),
+/* 295 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(24);
+
+var _actions = __webpack_require__(33);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var CurrentUser = function (_Component) {
+    _inherits(CurrentUser, _Component);
+
+    function CurrentUser() {
+        _classCallCheck(this, CurrentUser);
+
+        var _this = _possibleConstructorReturn(this, (CurrentUser.__proto__ || Object.getPrototypeOf(CurrentUser)).call(this));
+
+        _this.state = {
+            updatedProfile: {}
+        };
+        return _this;
+    }
+
+    _createClass(CurrentUser, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            console.log('CurrentUser (componentDidMount): ' + JSON.stringify(this.props.user));
+        }
+    }, {
+        key: 'updateCurrentUser',
+        value: function updateCurrentUser(event) {
+            event.preventDefault();
+            console.log('updateCurrentUser: ' + event.target.id + "==" + event.target.value);
+
+            var updated = Object.assign({}, this.state.updatedProfile);
+            updated[event.target.id] = event.target.value;
+            this.setState({
+                updatedProfile: updated
+            });
+        }
+    }, {
+        key: 'updateProfile',
+        value: function updateProfile(event) {
+            event.preventDefault();
+            console.log('UpdatedProfile: ' + JSON.stringify(this.state.updatedProfile));
+            if (Object.keys(this.state.updatedProfile).length == 0) {
+                alert('No Changes Made');
+                return;
+            }
+            this.props.updateProfile(this.props.user, this.state.updatedProfile);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var currentUser = this.props.user;
+            return _react2.default.createElement(
+                'div',
+                null,
+                _react2.default.createElement(
+                    'h2',
+                    null,
+                    ' Welcome ',
+                    currentUser.username,
+                    ' '
+                ),
+                _react2.default.createElement('input', { type: 'text', id: 'username', onChange: this.updateCurrentUser.bind(this), defaultValue: currentUser.username, placeholder: 'Username' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement('input', { type: 'text', id: 'gender', onChange: this.updateCurrentUser.bind(this), defaultValue: currentUser.gender, placeholder: 'Gender' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement('input', { type: 'text', id: 'city', onChange: this.updateCurrentUser.bind(this), defaultValue: currentUser.city, placeholder: 'City' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement(
+                    'button',
+                    { onClick: this.updateProfile.bind(this) },
+                    'Update Profile'
+                )
+            );
+        }
+    }]);
+
+    return CurrentUser;
+}(_react.Component);
+
+var stateToProps = function stateToProps(state) {
+    return {
+        user: state.account.user
+    };
+};
+
+var dispatchToProps = function dispatchToProps(dispatch) {
+    return {
+        updateProfile: function updateProfile(profile, updated) {
+            return dispatch(_actions.actions.updateProfile(profile, updated));
+        }
+    };
+};
+
+exports.default = (0, _reactRedux.connect)(stateToProps, dispatchToProps)(CurrentUser);
 
 /***/ })
 /******/ ]);

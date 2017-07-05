@@ -16,6 +16,7 @@ class Profile extends Component{
 
             this.props.fetchProfile({username: this.props.username})
         }
+
     }
 
     render(){

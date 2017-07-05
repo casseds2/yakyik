@@ -15,6 +15,7 @@ class Zones extends Component{
     componentDidMount(){
         //console.log('Zones componentDidMount: ')
         this.props.fetchZones(null)
+        //Removed API call from here and put it into actions: fetchZones
     }
 
     submitZone(zone){

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { APIManager } from '../../utils'
 import { actions } from '../../actions'
 import { connect } from 'react-redux'
+import { Link } from 'react-router-dom'
 
 class Account extends Component{
 
@@ -132,7 +133,9 @@ class Account extends Component{
             content = (
                 <div>
                     <h2>Welcome {this.props.user.username}!</h2>
+                    <span>{this.props.user.city}</span><br />
                     <button onClick={this.logout.bind(this)}>Log Out</button>
+                    <Link to="/currentuser"><button>Account</button></Link>
                 </div>
             )
         }

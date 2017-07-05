@@ -17,19 +17,25 @@ export default {
                 type: constants.APPLICATION_STATE,
                 status: 'loading'
             })
+
             APIManager.get('/api/zone', params, (err, response) => {
                 if(err){
                     alert(err)
                     return
                 }
-                console.log(JSON.stringify(response))
+                console.log('Action (fetchZones):' + JSON.stringify(response))
                 const zones = response.results
-                setTimeout(() => {
-                    dispatch({
-                        type: constants.ZONES_RECEIVED,
-                        zones: zones
-                    })
-                }, 3000)
+                dispatch({
+                    type: constants.ZONES_RECEIVED,
+                    zones: zones
+                })
+                //Simulate Bad Internet Connection
+                // setTimeout(() => {
+                //     dispatch({
+                //         type: constants.ZONES_RECEIVED,
+                //         zones: zones
+                //     })
+                // }, 3000)
             })
         }
     },
@@ -88,19 +94,37 @@ export default {
                     console.log('ERROR: ' + err)
                     return
                 }
-                //console.log('fetchProfile: ' + JSON.stringify(response))
+                console.log('Action (fetchProfile): ' + JSON.stringify(response))
                 if (response.results.length == 0) {
                     alert('Profile Not Found.')
                     return
                 }
                 const profile = response.results[0]
                 //Timeout Simulates Weak Internet Connection
-                setTimeout(() => {
-                    dispatch({
-                        type: constants.PROFILE_RECEIVED,
-                        profile: profile
-                    })
-                }, 3000)
+                // setTimeout(() => {
+                //     dispatch({
+                //         type: constants.PROFILE_RECEIVED,
+                //         profile: profile
+                //     })
+                // }, 3000)
+            })
+        }
+    },
+
+    updateProfile: (profile, updated) => {
+        return(dispatch) => {
+            const endpoint = '/api/profile/' + profile._id
+            APIManager.put(endpoint, updated, (err, response) => {
+                if(err){
+                    alert('ERROR: ' + JSON.stringify(err))
+                    return
+                }
+                const updatedProfile = response.results
+                dispatch({
+                    type: constants.PROFILE_UPDATED,
+                    profile: updatedProfile
+                })
+                console.log('Profile Updated: ' + JSON.stringify(response))
             })
         }
     }

@@ -40,8 +40,23 @@ export default {
         })
     },
 
-    put: () => {
-
+    put: (url, body, callback) => {
+        superagent
+        .put(url)
+        .send(body)
+        .set('Accept', 'application/JSON')
+        .end((err, response) => {
+            if(err){
+                callback(err, null)
+                return
+            }
+            const confirmation = response.body.confirmation
+            if(confirmation != 'success'){
+                callback({message: response.body.message}, null)
+                return
+            }
+            callback(null, response.body)
+        })
     },
 
     delete: () => {
