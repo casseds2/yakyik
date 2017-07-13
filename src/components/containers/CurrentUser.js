@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { actions } from '../../actions'
 import Dropzone from 'react-dropzone'
 import { APIManager } from '../../utils'
+import sha1 from 'sha1'
+
 
 class CurrentUser extends Component{
 
@@ -42,10 +44,26 @@ class CurrentUser extends Component{
 
     uploadImage(files){ //Uploads Array of Files
         const image = files[0]
-        APIManager.upload('', image, {}, () => {
-
+        const cloudName = 'hiody6ehr' //From Cloudinary Dashboard
+        const url = 'https://api.cloudinary.com/v1_1/' + cloudName + '/image/upload' //URL from http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api
+        let timestamp = Date.now() / 1000
+        const uploadPreset = 'cpi4wdvs'
+        const paramsString = 'timestamp=' + timestamp + '&upload_preset=' + uploadPreset + 'agpNQwxjQIVcT_AoK6s-C52wA6c'
+        const signature = sha1(paramsString)
+        const params = {
+            'api_key': '937247372727724',
+            'timestamp': timestamp,
+            'upload_preset': uploadPreset,
+            'signature': signature
+        }
+        APIManager.upload(url, image, params, (err, response) => {
+            if(err){
+                console.log('UPLOAD ERROR: ' + JSON.stringify(err))
+                return
+            }
+            console.log('UPLOAD COMPLETE: ' + JSON.stringify(response))
         })
-        console.log('UploadedImage: ')
+        //console.log('UploadedImage: ')
     }
 
     render(){
