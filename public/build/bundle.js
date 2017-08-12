@@ -15062,6 +15062,8 @@ var CurrentUser = function (_Component) {
     }, {
         key: 'uploadImage',
         value: function uploadImage(files) {
+            var _this2 = this;
+
             //Uploads Array of Files
             var image = files[0];
             var cloudName = 'hiody6ehr'; //From Cloudinary Dashboard
@@ -15078,10 +15080,17 @@ var CurrentUser = function (_Component) {
             };
             _utils.APIManager.upload(url, image, params, function (err, response) {
                 if (err) {
-                    console.log('UPLOAD ERROR: ' + JSON.stringify(err));
+                    //console.log('UPLOAD ERROR: ' + JSON.stringify(err))
+                    alert(err);
                     return;
                 }
-                console.log('UPLOAD COMPLETE: ' + JSON.stringify(response));
+                console.log('UPLOAD COMPLETE: ' + JSON.stringify(response.body));
+                var imageUrl = response.body['secure_url'];
+                var updatedProfile = Object.assign({}, _this2.state.updatedProfile);
+                updatedProfile['image'] = imageUrl;
+                _this2.setState({
+                    updatedProfile: updatedProfile
+                });
             });
             //console.log('UploadedImage: ')
         }
@@ -15089,6 +15098,7 @@ var CurrentUser = function (_Component) {
         key: 'render',
         value: function render() {
             var currentUser = this.props.user;
+            var image = this.state.updatedProfile.image == null ? '' : this.state.updatedProfile.image.replace('upload', 'upload/c_thumb,h_150,w_150,x_0,y_0'); //thumbnail image
             return _react2.default.createElement(
                 'div',
                 null,
@@ -15104,6 +15114,8 @@ var CurrentUser = function (_Component) {
                 _react2.default.createElement('input', { type: 'text', id: 'gender', onChange: this.updateCurrentUser.bind(this), defaultValue: currentUser.gender, placeholder: 'Gender' }),
                 _react2.default.createElement('br', null),
                 _react2.default.createElement('input', { type: 'text', id: 'city', onChange: this.updateCurrentUser.bind(this), defaultValue: currentUser.city, placeholder: 'City' }),
+                _react2.default.createElement('br', null),
+                _react2.default.createElement('img', { src: image }),
                 _react2.default.createElement('br', null),
                 _react2.default.createElement(_reactDropzone2.default, { onDrop: this.uploadImage.bind(this) }),
                 _react2.default.createElement(

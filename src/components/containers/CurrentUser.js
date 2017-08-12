@@ -58,22 +58,31 @@ class CurrentUser extends Component{
         }
         APIManager.upload(url, image, params, (err, response) => {
             if(err){
-                console.log('UPLOAD ERROR: ' + JSON.stringify(err))
+                //console.log('UPLOAD ERROR: ' + JSON.stringify(err))
+                alert(err)
                 return
             }
-            console.log('UPLOAD COMPLETE: ' + JSON.stringify(response))
+            console.log('UPLOAD COMPLETE: ' + JSON.stringify(response.body))
+            const imageUrl = response.body['secure_url']
+            let updatedProfile = Object.assign({}, this.state.updatedProfile)
+            updatedProfile['image'] = imageUrl
+            this.setState({
+                updatedProfile: updatedProfile
+            })
         })
         //console.log('UploadedImage: ')
     }
 
     render(){
         const currentUser = this.props.user
+        const image = (this.state.updatedProfile.image == null) ? '' : this.state.updatedProfile.image.replace('upload', 'upload/c_thumb,h_150,w_150,x_0,y_0') //thumbnail image
         return(
             <div>
                 <h2> Welcome { currentUser.username } </h2>
                 <input type="text" id="username" onChange={this.updateCurrentUser.bind(this)} defaultValue={currentUser.username} placeholder="Username"/><br/>
                 <input type="text" id="gender" onChange={this.updateCurrentUser.bind(this)} defaultValue={currentUser.gender} placeholder="Gender"/><br/>
                 <input type="text" id="city" onChange={this.updateCurrentUser.bind(this)} defaultValue={currentUser.city} placeholder="City"/><br/>
+                <img src={image} /><br />
                 <Dropzone onDrop={this.uploadImage.bind(this)} />
                 <button onClick={this.updateProfile.bind(this)}>Update Profile</button>
             </div>
