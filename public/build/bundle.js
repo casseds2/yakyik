@@ -3113,15 +3113,20 @@ exports.constants = _constants2.default;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.APIManager = undefined;
+exports.ImageHelper = exports.APIManager = undefined;
 
 var _APIManager = __webpack_require__(145);
 
 var _APIManager2 = _interopRequireDefault(_APIManager);
 
+var _ImageHelper = __webpack_require__(304);
+
+var _ImageHelper2 = _interopRequireDefault(_ImageHelper);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.APIManager = _APIManager2.default;
+exports.ImageHelper = _ImageHelper2.default;
 
 /***/ }),
 /* 28 */
@@ -14727,6 +14732,7 @@ var Account = function (_Component) {
                 content = _react2.default.createElement(
                     'div',
                     null,
+                    _react2.default.createElement('img', { style: { borderRadius: 40, float: 'left', marginRight: 12 }, src: _utils.ImageHelper.thumbnail(this.props.user.image, 80) }),
                     _react2.default.createElement(
                         'h2',
                         null,
@@ -15098,7 +15104,7 @@ var CurrentUser = function (_Component) {
         key: 'render',
         value: function render() {
             var currentUser = this.props.user;
-            var image = this.state.updatedProfile.image == null ? '' : this.state.updatedProfile.image.replace('upload', 'upload/c_thumb,h_150,w_150,x_0,y_0'); //thumbnail image
+            var image = this.state.updatedProfile.image == null ? '' : _utils.ImageHelper.thumbnail(this.state.updatedProfile.image, 150); //thumbnail image
             return _react2.default.createElement(
                 'div',
                 null,
@@ -34764,6 +34770,24 @@ var valueEqual = function valueEqual(a, b) {
 };
 
 exports.default = valueEqual;
+
+/***/ }),
+/* 304 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+
+    thumbnail: function thumbnail(url, dimension) {
+        var thumbParams = 'upload/c_thumb,h_' + dimension + ',w_' + dimension + ',x_0,y_0';
+        return url.replace('upload', thumbParams);
+    }
+};
 
 /***/ })
 /******/ ]);

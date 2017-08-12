@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { APIManager } from '../../utils'
+import { APIManager, ImageHelper } from '../../utils'
 import { actions } from '../../actions'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
@@ -132,6 +132,7 @@ class Account extends Component{
         else{
             content = (
                 <div>
+                    <img style={{borderRadius:40, float:'left', marginRight:12}} src={ImageHelper.thumbnail(this.props.user.image, 80)}/>
                     <h2>Welcome {this.props.user.username}!</h2>
                     <span>{this.props.user.city}</span><br />
                     <button onClick={this.logout.bind(this)}>Log Out</button>
