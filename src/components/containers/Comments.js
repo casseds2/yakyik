@@ -48,6 +48,11 @@ class Comments extends Component{
         updatedComment['zone'] = zone._id
         updatedComment['username'] = this.props.user.username
         console.log('submitComment: ' + JSON.stringify(updatedComment))
+        updatedComment['author'] = {
+            id: this.props.user._id,
+            username: this.props.user.username,
+            image:this.props.user.image
+        }
         APIManager.post('/api/comment', updatedComment, (err, response) => {
             if(err){
                 alert('ERROR: ' + err.message)
@@ -69,17 +74,31 @@ class Comments extends Component{
         })
     }
 
+    updateComment(comment, updatedBody){
+        console.log('updateComment: ' + comment._id + ', ' + updatedBody)
+        //Want to Update the Comment in Database Here
+        this.props.updateComment(comment, {body: updatedBody})
+    }
+
     render(){
         const selectedZone = this.props.zones[this.props.index]
+        const currentUser = this.props.user //null if not logged in
         let zoneName = null
         let commentList = null
+
+
         if(selectedZone != null) {
             zoneName = selectedZone.name
             let zoneComments = this.props.commentsMap[selectedZone._id]
             if (zoneComments != null) {
                 commentList = zoneComments.map((comment, i) => {
+                    let editable = false
+                    if(currentUser != null){
+                        if(currentUser._id == comment.author.id)
+                            editable = true
+                    }
                     return (
-                        <li key={i}><Comment currentComment={comment}/></li>
+                        <li key={i}><Comment onUpdate={this.updateComment.bind(this)} isEditable={editable} currentComment={comment}/></li>
                     )
                 })
             }
@@ -115,7 +134,9 @@ const stateToProps = (state) => { //state may also be known as store...conventio
 const dispatchToProps = (dispatch) => {
     return{
         commentsReceived: (comments, zone) => dispatch(actions.commentsReceived(comments, zone)),
-        commentCreated: (comment) => dispatch(actions.commentCreated(comment))
+        commentCreated: (comment) => dispatch(actions.commentCreated(comment)),
+        updateComment: (comment, params) => dispatch(actions.updateComment(comment, params))
+
     }
 }
 

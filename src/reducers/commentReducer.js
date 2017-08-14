@@ -41,6 +41,21 @@ export default (state = initialState, action) => {
             updated['map'] = updatedMap
             return updated
 
+        case constants.COMMENT_UPDATED:
+            console.log('COMMENT_UPDATED: ' + JSON.stringify(action.comment))
+            let list = updatedMap[action.comment.zone]
+            let newList = []
+            list.forEach((comment, i) => {
+                if(comment._id == action.comment._id)
+                    newList.push(action.comment)
+                else
+                    newList.push(comment)
+            })
+
+            updatedMap[action.comment.zone]= newList
+            updated['map'] = updatedMap
+            return updated
+
         case constants.SELECTED_ZONE:
             return updated
 

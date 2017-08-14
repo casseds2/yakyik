@@ -61,6 +61,24 @@ export default {
         }
     },
 
+    updateComment: (comment,params) => {
+        return(dispatch) => {
+            const endpoint = '/api/comment/' + comment._id
+            APIManager.put(endpoint, params, (err, response) => {
+                if(err){
+                    alert(err)
+                    return
+                }
+                console.log(JSON.stringify(response))
+                const updatedComment = response.results
+                dispatch({
+                    type: constants.COMMENT_UPDATED,
+                    comment: updatedComment
+                })
+            })
+        }
+    },
+
     commentsReceived: (comments, zone) => {
         return{
             type: constants.COMMENTS_RECEIVED,

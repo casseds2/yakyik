@@ -14412,6 +14412,24 @@ exports.default = {
         };
     },
 
+    updateComment: function updateComment(comment, params) {
+        return function (dispatch) {
+            var endpoint = '/api/comment/' + comment._id;
+            _utils.APIManager.put(endpoint, params, function (err, response) {
+                if (err) {
+                    alert(err);
+                    return;
+                }
+                console.log(JSON.stringify(response));
+                var updatedComment = response.results;
+                dispatch({
+                    type: _constants.constants.COMMENT_UPDATED,
+                    comment: updatedComment
+                });
+            });
+        };
+    },
+
     commentsReceived: function commentsReceived(comments, zone) {
         return {
             type: _constants.constants.COMMENTS_RECEIVED,
@@ -14887,6 +14905,11 @@ var Comments = function (_Component) {
             updatedComment['zone'] = zone._id;
             updatedComment['username'] = this.props.user.username;
             console.log('submitComment: ' + JSON.stringify(updatedComment));
+            updatedComment['author'] = {
+                id: this.props.user._id,
+                username: this.props.user.username,
+                image: this.props.user.image
+            };
             _utils.APIManager.post('/api/comment', updatedComment, function (err, response) {
                 if (err) {
                     alert('ERROR: ' + err.message);
@@ -14909,20 +14932,35 @@ var Comments = function (_Component) {
             });
         }
     }, {
+        key: 'updateComment',
+        value: function updateComment(comment, updatedBody) {
+            console.log('updateComment: ' + comment._id + ', ' + updatedBody);
+            //Want to Update the Comment in Database Here
+            this.props.updateComment(comment, { body: updatedBody });
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
             var selectedZone = this.props.zones[this.props.index];
+            var currentUser = this.props.user; //null if not logged in
             var zoneName = null;
             var commentList = null;
+
             if (selectedZone != null) {
                 zoneName = selectedZone.name;
                 var zoneComments = this.props.commentsMap[selectedZone._id];
                 if (zoneComments != null) {
                     commentList = zoneComments.map(function (comment, i) {
+                        var editable = false;
+                        if (currentUser != null) {
+                            if (currentUser._id == comment.author.id) editable = true;
+                        }
                         return _react2.default.createElement(
                             'li',
                             { key: i },
-                            _react2.default.createElement(_presentation.Comment, { currentComment: comment })
+                            _react2.default.createElement(_presentation.Comment, { onUpdate: _this4.updateComment.bind(_this4), isEditable: editable, currentComment: comment })
                         );
                     });
                 }
@@ -14978,7 +15016,11 @@ var dispatchToProps = function dispatchToProps(dispatch) {
         },
         commentCreated: function commentCreated(comment) {
             return dispatch(_actions.actions.commentCreated(comment));
+        },
+        updateComment: function updateComment(comment, params) {
+            return dispatch(_actions.actions.updateComment(comment, params));
         }
+
     };
 };
 
@@ -15601,6 +15643,8 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRouterDom = __webpack_require__(43);
 
+var _utils = __webpack_require__(27);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -15615,7 +15659,13 @@ var Comment = function (_Component) {
     function Comment() {
         _classCallCheck(this, Comment);
 
-        return _possibleConstructorReturn(this, (Comment.__proto__ || Object.getPrototypeOf(Comment)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (Comment.__proto__ || Object.getPrototypeOf(Comment)).call(this));
+
+        _this.state = {
+            isEditing: false,
+            updated: null
+        };
+        return _this;
     }
 
     _createClass(Comment, [{
@@ -15623,37 +15673,114 @@ var Comment = function (_Component) {
         value: function render() {
 
             var currentComment = this.props.currentComment;
+            var author = currentComment.author;
+            var editable = this.props.isEditable ? this.props.isEditable : false;
+
+            var content = null;
+            if (this.state.isEditing == true) {
+                content = _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement('textarea', { onChange: this.updateBody.bind(this), defaultValue: currentComment.body, style: { width: 100 + '%' } }),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('img', { style: { borderRadius: 15, float: 'left', marginRight: 12 }, src: _utils.ImageHelper.thumbnail(author.image, 30) }),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { fontWeight: 200 } },
+                        _react2.default.createElement(
+                            _reactRouterDom.Link,
+                            { to: '/profile/' + author.username },
+                            author.username
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { fontWeight: 200, marginLeft: 12, marginRight: 12 } },
+                        ' | '
+                    ),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { fontWeight: 200 } },
+                        currentComment.timestamp
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { style: { marginLeft: 12 }, onClick: this.toggleEdit.bind(this) },
+                        'Done'
+                    ),
+                    _react2.default.createElement('hr', null)
+                );
+            } else {
+                content = _react2.default.createElement(
+                    'div',
+                    { style: { marginBottom: 16 } },
+                    _react2.default.createElement(
+                        'p',
+                        { style: { fontSize: 20, fontWeight: 400 } },
+                        currentComment.body
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement('img', { style: { borderRadius: 15, float: 'left', marginRight: 12 }, src: _utils.ImageHelper.thumbnail(author.image, 30) }),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { fontWeight: 200 } },
+                        _react2.default.createElement(
+                            _reactRouterDom.Link,
+                            { to: '/profile/' + author.username },
+                            author.username
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { marginLeft: 12, marginRight: 12 } },
+                        ' | '
+                    ),
+                    _react2.default.createElement(
+                        'span',
+                        { style: { fontWeight: 200 } },
+                        currentComment.timestamp
+                    ),
+                    editable ? _react2.default.createElement(
+                        'button',
+                        { style: { marginLeft: 12 }, onClick: this.toggleEdit.bind(this) },
+                        'Edit'
+                    ) : null,
+                    _react2.default.createElement('hr', null)
+                );
+            }
 
             return _react2.default.createElement(
                 'div',
-                { style: { marginBottom: 16 } },
-                _react2.default.createElement(
-                    'p',
-                    { style: { fontSize: 20, fontWeight: 400 } },
-                    currentComment.body
-                ),
-                _react2.default.createElement('br', null),
-                _react2.default.createElement(
-                    'span',
-                    { style: { fontWeight: 200 } },
-                    _react2.default.createElement(
-                        _reactRouterDom.Link,
-                        { to: '/profile/' + currentComment.username },
-                        currentComment.username
-                    )
-                ),
-                _react2.default.createElement(
-                    'span',
-                    { style: { marginLeft: 12, marginRight: 12 } },
-                    ' | '
-                ),
-                _react2.default.createElement(
-                    'span',
-                    { style: { fontWeight: 200 } },
-                    currentComment.timestamp
-                ),
-                _react2.default.createElement('hr', null)
+                null,
+                content
             );
+        }
+    }, {
+        key: 'updateBody',
+        value: function updateBody(event) {
+            console.log('updatedBody: ' + event.target.value);
+            this.setState({
+                updated: event.target.value
+            });
+        }
+    }, {
+        key: 'toggleEdit',
+        value: function toggleEdit(event) {
+            event.preventDefault();
+            //console.log('Edit Button')
+            if (this.state.isEditing) {
+                if (this.state.updated != null) {
+                    this.props.onUpdate(this.props.currentComment, this.state.updated); //Pass Updated String Back
+                }
+            }
+            this.setState({
+                isEditing: !this.state.isEditing
+            });
+        }
+    }, {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            console.log('isEditing: ' + this.state.isEditing);
         }
     }]);
 
@@ -15993,6 +16120,7 @@ exports.default = {
 
     COMMENTS_RECEIVED: 'COMMENTS_RECEIVED',
     COMMENT_CREATED: 'COMMENT_CREATED',
+    COMMENT_UPDATED: 'COMMENT_UPDATED',
 
     CURRENT_USER_RECEIVED: 'CURRENT_USER_RECEIVED',
 
@@ -16097,6 +16225,18 @@ exports.default = function () {
             }
             commentList.push(action.comment);
             updatedMap[action.comment.zone] = commentList;
+            updated['map'] = updatedMap;
+            return updated;
+
+        case _constants.constants.COMMENT_UPDATED:
+            console.log('COMMENT_UPDATED: ' + JSON.stringify(action.comment));
+            var list = updatedMap[action.comment.zone];
+            var newList = [];
+            list.forEach(function (comment, i) {
+                if (comment._id == action.comment._id) newList.push(action.comment);else newList.push(comment);
+            });
+
+            updatedMap[action.comment.zone] = newList;
             updated['map'] = updatedMap;
             return updated;
 
