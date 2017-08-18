@@ -21,7 +21,7 @@ var APIManager = _utils.APIManager;
 var ImageHelper = _utils.ImageHelper;
 var actions = require("../../actions").actions;
 var connect = require("react-redux").connect;
-var Link = require("react-router-dom").Link;
+var Link = require("react-router").Link;
 var Account = (function (Component) {
     function Account() {
         _classCallCheck(this, Account);

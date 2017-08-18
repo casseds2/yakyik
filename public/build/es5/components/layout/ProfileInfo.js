@@ -32,7 +32,7 @@ var ProfileInfo = (function (Component) {
                     "div",
                     null,
                     "Profile Info Layout",
-                    React.createElement(Profile, { username: this.props.match.params.username })
+                    React.createElement(Profile, { username: this.props.params.username })
                 );
             },
             writable: true,

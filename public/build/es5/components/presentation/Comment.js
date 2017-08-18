@@ -15,7 +15,7 @@ var _react = require("react");
 var React = _interopRequire(_react);
 
 var Component = _react.Component;
-var Link = require("react-router-dom").Link;
+var Link = require("react-router").Link;
 var ImageHelper = require("../../utils").ImageHelper;
 var Comment = (function (Component) {
     function Comment() {

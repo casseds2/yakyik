@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { APIManager, ImageHelper } from '../../utils'
 import { actions } from '../../actions'
 import { connect } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 class Account extends Component{
 

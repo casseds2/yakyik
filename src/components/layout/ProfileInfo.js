@@ -8,7 +8,7 @@ class ProfileInfo extends Component{
         return(
             <div>
                 Profile Info Layout
-                <Profile username={this.props.match.params.username} />
+                <Profile username={this.props.params.username} />
             </div>
         )
     }
