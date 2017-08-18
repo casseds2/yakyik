@@ -1,5 +1,0 @@
-TODO:
-	Start Video Fourteen Again
-		-Re-do Gulp
-		-Fix Merge Issue With master and 13
-		-React Router may be used ahead of react-router-dom
