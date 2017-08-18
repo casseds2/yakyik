@@ -120,10 +120,10 @@ export default {
                 const profile = response.results[0]
                 //Timeout Simulates Weak Internet Connection
                 // setTimeout(() => {
-                //     dispatch({
-                //         type: constants.PROFILE_RECEIVED,
-                //         profile: profile
-                //     })
+                     dispatch({
+                         type: constants.PROFILE_RECEIVED,
+                         profile: profile
+                     })
                 // }, 3000)
             })
         }
