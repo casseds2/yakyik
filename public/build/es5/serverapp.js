@@ -13,20 +13,8 @@ var _react = require("react");
 var React = _interopRequire(_react);
 
 var Component = _react.Component;
-var _componentsLayout = require("./components/layout");
-
-var Home = _componentsLayout.Home;
-var ProfileInfo = _componentsLayout.ProfileInfo;
-var CurrentUser = require("./components/containers").CurrentUser;
 var Provider = require("react-redux").Provider;
-var store = _interopRequire(require("./stores/store"));
-
-var _reactRouterDom = require("react-router-dom");
-
-var BrowserRouter = _reactRouterDom.BrowserRouter;
-var Route = _reactRouterDom.Route;
-var Router = _reactRouterDom.Router;
-//import { Router, Route, browserHistory } from 'react-router'
+var Main = _interopRequire(require("./components/Main"));
 
 var App = (function (Component) {
     function App() {
@@ -44,18 +32,8 @@ var App = (function (Component) {
             value: function render() {
                 return React.createElement(
                     Provider,
-                    { store: store.configureStore() },
-                    React.createElement(
-                        BrowserRouter,
-                        null,
-                        React.createElement(
-                            "div",
-                            null,
-                            React.createElement(Route, { exact: true, path: "/", component: Home }),
-                            React.createElement(Route, { path: "/profile/:username", component: ProfileInfo }),
-                            React.createElement(Route, { path: "/currentuser", component: CurrentUser })
-                        )
-                    )
+                    { store: this.props.route.initial },
+                    React.createElement(Main, this.props)
                 );
             },
             writable: true,

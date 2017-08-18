@@ -21,7 +21,8 @@ var store;
 
 module.exports = {
 
-    configureStore: function () {
+    configureStore: function (initial) {
+        //initial state for server side rendering
         var reducers = combineReducers({
             zone: zoneReducer,
             comment: commentReducer,
@@ -29,7 +30,7 @@ module.exports = {
             profile: profileReducer
         });
 
-        store = createStore(reducers, applyMiddleware(thunk));
+        store = createStore(reducers, initial, applyMiddleware(thunk));
 
         return store;
     },
