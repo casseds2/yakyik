@@ -24,14 +24,15 @@ class Comments extends Component{
         if(commentsArray != null){
             return
         }
-        APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
-            if(err){
-                alert('ERROR: ' + err.message)
-                return
-            }
-            let comments = response.results
-            this.props.commentsReceived(comments, zone)
-        })
+        this.props.fetchComments({zone: zone._id})
+        // APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
+        //     if(err){
+        //         alert('ERROR: ' + err.message)
+        //         return
+        //     }
+        //     let comments = response.results
+        //     this.props.commentsReceived(comments, zone)
+        // })
     }
 
     componentDidMount(){
@@ -140,8 +141,8 @@ const dispatchToProps = (dispatch) => {
     return{
         commentsReceived: (comments, zone) => dispatch(actions.commentsReceived(comments, zone)),
         commentCreated: (comment) => dispatch(actions.commentCreated(comment)),
-        updateComment: (comment, params) => dispatch(actions.updateComment(comment, params))
-
+        updateComment: (comment, params) => dispatch(actions.updateComment(comment, params)),
+        fetchComments: (params) => dispatch(actions.fetchComments(params))
     }
 }
 

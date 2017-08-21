@@ -11,14 +11,14 @@ class Profile extends Component{
     }
 
     componentDidMount(){
-        const profile = this.props.profiles[this.props.username] //Taken From The Map
-        if(profile != null){ //rendered server side
-            console.log('Profile Already Existed: ' + JSON.stringify(profile))
-            this.props.fetchComments({'author.id': profile._id})
+        let profile = this.props.profiles[this.props.username] //Taken From The Map
+        if(profile == null){ //rendered server side
+            console.log('Fetching the user profile...')
+            this.props.fetchProfile({username: this.props.username})
             return
         }
-        console.log('Fetching the user profile...')
-        this.props.fetchProfile({username: this.props.username})
+        console.log('Profile Already Existed: ' + JSON.stringify(profile))
+        this.props.fetchComments({'author.id': profile._id})
     }
 
     render(){
@@ -59,7 +59,7 @@ class Profile extends Component{
 /*State Variables To Properties*/
 const stateToProps = (state) => { //state may also be known as store...convention to call state
     return{
-        comments: state.comment.profileMap, //State Map of comments
+        comments: state.comment.map, //State Map of comments
         profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     }

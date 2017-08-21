@@ -12,11 +12,6 @@ export default {
 
     fetchComments: (params) => {
         return (dispatch) => {
-            // dispatch({
-            //     type: constants.APPLICATION_STATE,
-            //     status: 'loading',
-            //     reducer: 'commentReducer'
-            // })
             APIManager.get('/api/comment', params, (err, response) => {
                 if(err){
                     alert(err)
@@ -26,7 +21,8 @@ export default {
                 const comments = response.results
                 dispatch({
                     type: constants.COMMENTS_RECEIVED,
-                    comments: comments
+                    comments: comments,
+                    params: params
                 })
             })
         }

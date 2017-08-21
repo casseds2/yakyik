@@ -14007,11 +14007,6 @@ exports.default = {
 
     fetchComments: function fetchComments(params) {
         return function (dispatch) {
-            // dispatch({
-            //     type: constants.APPLICATION_STATE,
-            //     status: 'loading',
-            //     reducer: 'commentReducer'
-            // })
             _utils.APIManager.get('/api/comment', params, function (err, response) {
                 if (err) {
                     alert(err);
@@ -14021,7 +14016,8 @@ exports.default = {
                 var comments = response.results;
                 dispatch({
                     type: _constants.constants.COMMENTS_RECEIVED,
-                    comments: comments
+                    comments: comments,
+                    params: params
                 });
             });
         };
@@ -14537,8 +14533,6 @@ var Comments = function (_Component) {
     _createClass(Comments, [{
         key: 'checkForComments',
         value: function checkForComments() {
-            var _this2 = this;
-
             var zone = this.props.zones[this.props.index];
             if (zone == null) {
                 console.log('NO SELECTED ZONE');
@@ -14548,14 +14542,15 @@ var Comments = function (_Component) {
             if (commentsArray != null) {
                 return;
             }
-            _utils.APIManager.get('/api/comment', { zone: zone._id }, function (err, response) {
-                if (err) {
-                    alert('ERROR: ' + err.message);
-                    return;
-                }
-                var comments = response.results;
-                _this2.props.commentsReceived(comments, zone);
-            });
+            this.props.fetchComments({ zone: zone._id });
+            // APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
+            //     if(err){
+            //         alert('ERROR: ' + err.message)
+            //         return
+            //     }
+            //     let comments = response.results
+            //     this.props.commentsReceived(comments, zone)
+            // })
         }
     }, {
         key: 'componentDidMount',
@@ -14570,7 +14565,7 @@ var Comments = function (_Component) {
     }, {
         key: 'submitComment',
         value: function submitComment(comment) {
-            var _this3 = this;
+            var _this2 = this;
 
             if (this.props.user == null) {
                 alert('Please Sign Up or Log In To Comment');
@@ -14593,7 +14588,7 @@ var Comments = function (_Component) {
                     return;
                 }
                 var updatedComment = response.results;
-                _this3.props.commentCreated(updatedComment);
+                _this2.props.commentCreated(updatedComment);
                 //Could also use this approach, re-uses code and is elegant
                 //this.props.commentsReceived([updatedComment], zone)
             });
@@ -14618,7 +14613,7 @@ var Comments = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this3 = this;
 
             var selectedZone = this.props.zones[this.props.index];
             var currentUser = this.props.user; //null if not logged in
@@ -14637,7 +14632,7 @@ var Comments = function (_Component) {
                         return _react2.default.createElement(
                             'li',
                             { key: i },
-                            _react2.default.createElement(_presentation.Comment, { onUpdate: _this4.updateComment.bind(_this4), isEditable: editable, currentComment: comment })
+                            _react2.default.createElement(_presentation.Comment, { onUpdate: _this3.updateComment.bind(_this3), isEditable: editable, currentComment: comment })
                         );
                     });
                 }
@@ -14696,8 +14691,10 @@ var dispatchToProps = function dispatchToProps(dispatch) {
         },
         updateComment: function updateComment(comment, params) {
             return dispatch(_actions.actions.updateComment(comment, params));
+        },
+        fetchComments: function fetchComments(params) {
+            return dispatch(_actions.actions.fetchComments(params));
         }
-
     };
 };
 
@@ -14916,14 +14913,14 @@ var Profile = function (_Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             var profile = this.props.profiles[this.props.username]; //Taken From The Map
-            if (profile != null) {
+            if (profile == null) {
                 //rendered server side
-                console.log('Profile Already Existed: ' + JSON.stringify(profile));
-                this.props.fetchComments({ 'author.id': profile._id });
+                console.log('Fetching the user profile...');
+                this.props.fetchProfile({ username: this.props.username });
                 return;
             }
-            console.log('Fetching the user profile...');
-            this.props.fetchProfile({ username: this.props.username });
+            console.log('Profile Already Existed: ' + JSON.stringify(profile));
+            this.props.fetchComments({ 'author.id': profile._id });
         }
     }, {
         key: 'render',
@@ -14993,7 +14990,7 @@ var Profile = function (_Component) {
 var stateToProps = function stateToProps(state) {
     //state may also be known as store...convention to call state
     return {
-        comments: state.comment.profileMap, //State Map of comments
+        comments: state.comment.map, //State Map of comments
         profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     };
@@ -15897,8 +15894,7 @@ Object.defineProperty(exports, "__esModule", {
 var _constants = __webpack_require__(34);
 
 var initialState = {
-    map: {},
-    profileMap: {}
+    map: {}
 };
 
 exports.default = function () {
@@ -15908,33 +15904,41 @@ exports.default = function () {
 
     var updated = Object.assign({}, state);
     var updatedMap = Object.assign([], updated.map);
-    var updatedProfileMap = Object.assign({}, updated.profileMap);
+    //let updatedProfileMap = Object.assign({}, updated.profileMap)
 
     switch (action.type) {
 
         case _constants.constants.COMMENTS_RECEIVED:
 
-            if (action.zone != null) {
-                var zoneComments = updatedMap[action.zone._id];
-                if (zoneComments == null) {
-                    zoneComments = [];
-                } else {
-                    zoneComments = Object.assign([], zoneComments);
-                }
-                action.comments.forEach(function (comment, i) {
-                    zoneComments.push(comment);
-                });
-                updatedMap[action.zone._id] = zoneComments;
-                updated['map'] = updatedMap;
-                //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
-            }
-            action.comments.forEach(function (comment, i) {
-                var profileComments = updatedProfileMap[comment.author.id] ? updatedProfileMap[comment.author.id] : [];
-                profileComments.push(comment);
-                updatedProfileMap[comment.author.id] = profileComments;
-            });
-            updated['profileMap'] = updatedProfileMap;
-            console.log('PROFILE_MAP: ' + JSON.stringify(updatedProfileMap));
+            console.log('COMMENTS_RECEIVED: ' + JSON.stringify(action.comments));
+            console.log('PARAMS: ' + JSON.stringify(action.params));
+
+            var keys = Object.keys(action.params);
+            console.log('KEY: ' + keys[0]);
+
+            action.comments;
+            // if(action.zone != null) {
+            //     let zoneComments = updatedMap[action.zone._id]
+            //     if (zoneComments == null) {
+            //         zoneComments = []
+            //     }
+            //     else {
+            //         zoneComments = Object.assign([], zoneComments)
+            //     }
+            //     action.comments.forEach((comment, i) => {
+            //         zoneComments.push(comment)
+            //     })
+            //     updatedMap[action.zone._id] = zoneComments
+            //     updated['map'] = updatedMap
+            //     //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
+            // }
+            // action.comments.forEach((comment, i) => {
+            //     let profileComments = (updatedProfileMap[comment.author.id]) ? updatedProfileMap[comment.author.id] : []
+            //     profileComments.push(comment)
+            //     updatedProfileMap[comment.author.id] = profileComments
+            // })
+            // updated['profileMap'] = updatedProfileMap
+            // console.log('PROFILE_MAP: ' + JSON.stringify(updatedProfileMap))
 
             return updated;
 
