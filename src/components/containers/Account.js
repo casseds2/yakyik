@@ -18,15 +18,8 @@ class Account extends Component{
         }
     }
 
+    //Check for if user logged in moved to Server Side
     componentDidMount(){
-        APIManager.get('/account/currentuser', null, (err, response) => {
-            if(err){
-                //alert(err.message) //Not Logged In Error
-                return
-            }
-            //console.log('Account Component Did Mount: ' + JSON.stringify(response))
-            this.props.currentUserReceived(response.user)
-        })
     }
 
     login(event){

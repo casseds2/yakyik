@@ -34,9 +34,11 @@ var Zones = (function (Component) {
 
     _prototypeProperties(Zones, null, {
         componentDidMount: {
+
+            //API Request moved to server side rendering
             value: function componentDidMount() {
-                //console.log('Zones componentDidMount: ')
-                this.props.fetchZones(null);
+                console.log("Zones componentDidMount: ");
+                console.log("APPLICATION_STATE (Zones container): " + this.props.appStatus);
             },
             writable: true,
             configurable: true
@@ -141,4 +143,5 @@ var dispatchToProps = function (dispatch) {
 };
 
 module.exports = connect(stateToProps, dispatchToProps)(Zones);
+//this.props.fetchZones(null)
 //Removed API call from here and put it into actions: fetchZones

@@ -30,24 +30,20 @@ var Comments = (function (Component) {
 
         _get(Object.getPrototypeOf(Comments.prototype), "constructor", this).call(this);
         this.state = {};
+        this.checkForComments.bind(this);
     }
 
     _inherits(Comments, Component);
 
     _prototypeProperties(Comments, null, {
-        componentDidUpdate: {
-
-            /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
-            value: function componentDidUpdate() {
+        checkForComments: {
+            value: function checkForComments() {
                 var _this = this;
-                //console.log('Comments Container: componentDidUpdate')
                 var zone = this.props.zones[this.props.index];
                 if (zone == null) {
                     console.log("NO SELECTED ZONE");
                     return;
                 }
-                //Stop Duplicate Downloads of Comments from API
-                //If the Key List At the Current Key is Not Null, it Has Already Been Downloaded
                 var commentsArray = this.props.commentsMap[zone._id];
                 if (commentsArray != null) {
                     return;
@@ -60,6 +56,20 @@ var Comments = (function (Component) {
                     var comments = response.results;
                     _this.props.commentsReceived(comments, zone);
                 });
+            },
+            writable: true,
+            configurable: true
+        },
+        componentDidMount: {
+            value: function componentDidMount() {
+                this.checkForComments();
+            },
+            writable: true,
+            configurable: true
+        },
+        componentDidUpdate: {
+            value: function componentDidUpdate() {
+                this.checkForComments();
             },
             writable: true,
             configurable: true

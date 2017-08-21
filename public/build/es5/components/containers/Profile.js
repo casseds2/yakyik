@@ -32,11 +32,11 @@ var Profile = (function (Component) {
             value: function componentDidMount() {
                 var profile = this.props.profiles[this.props.username]; //Taken From The Map
                 console.log("Profile Container: " + JSON.stringify(profile));
-                if (profile == null) {
-                    //Fetch the profile if it has not already been downloaded
-                    console.log("Profile Container Fetching Profile...");
-                    this.props.fetchProfile({ username: this.props.username });
+                if (profile != null) {
+                    return;
                 }
+                console.log("Fetching the user profile...");
+                this.props.fetchProfile({ username: this.props.username });
             },
             writable: true,
             configurable: true

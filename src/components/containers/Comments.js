@@ -11,18 +11,15 @@ class Comments extends Component{
         super()
         this.state = {
         }
+        this.checkForComments.bind(this)
     }
 
-    /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
-    componentDidUpdate(){
-        //console.log('Comments Container: componentDidUpdate')
+    checkForComments(){
         let zone = this.props.zones[this.props.index]
         if(zone == null){
             console.log('NO SELECTED ZONE')
             return
         }
-        //Stop Duplicate Downloads of Comments from API
-        //If the Key List At the Current Key is Not Null, it Has Already Been Downloaded
         let commentsArray = this.props.commentsMap[zone._id]
         if(commentsArray != null){
             return
@@ -35,6 +32,14 @@ class Comments extends Component{
             let comments = response.results
             this.props.commentsReceived(comments, zone)
         })
+    }
+
+    componentDidMount(){
+        this.checkForComments()
+    }
+
+    componentDidUpdate(){
+        this.checkForComments()
     }
 
     submitComment(comment){

@@ -14010,7 +14010,8 @@ exports.default = {
 
             dispatch({
                 type: _constants.constants.APPLICATION_STATE,
-                status: 'loading'
+                status: 'loading',
+                reducer: 'zoneReducer'
             });
 
             _utils.APIManager.get('/api/zone', params, function (err, response) {
@@ -14100,7 +14101,8 @@ exports.default = {
         return function (dispatch) {
             dispatch({
                 type: _constants.constants.APPLICATION_STATE,
-                status: 'loading'
+                status: 'loading',
+                reducer: 'profileReducer'
             });
             _utils.APIManager.get('/api/profile', params, function (err, response) {
                 if (err) {
@@ -14254,24 +14256,16 @@ var Account = function (_Component) {
         return _this;
     }
 
+    //Check for if user logged in moved to Server Side
+
+
     _createClass(Account, [{
         key: 'componentDidMount',
-        value: function componentDidMount() {
-            var _this2 = this;
-
-            _utils.APIManager.get('/account/currentuser', null, function (err, response) {
-                if (err) {
-                    //alert(err.message) //Not Logged In Error
-                    return;
-                }
-                //console.log('Account Component Did Mount: ' + JSON.stringify(response))
-                _this2.props.currentUserReceived(response.user);
-            });
-        }
+        value: function componentDidMount() {}
     }, {
         key: 'login',
         value: function login(event) {
-            var _this3 = this;
+            var _this2 = this;
 
             event.preventDefault();
             console.log('login: ' + JSON.stringify(this.state.profile));
@@ -14292,13 +14286,13 @@ var Account = function (_Component) {
                     return;
                 }
                 console.log(JSON.stringify(response));
-                _this3.props.currentUserReceived(response.user); //Updates state which updates container
+                _this2.props.currentUserReceived(response.user); //Updates state which updates container
             });
         }
     }, {
         key: 'logout',
         value: function logout(event) {
-            var _this4 = this;
+            var _this3 = this;
 
             event.preventDefault();
             console.log('logout: ');
@@ -14308,7 +14302,7 @@ var Account = function (_Component) {
                     return;
                 }
                 console.log(JSON.stringify(response));
-                _this4.props.currentUserReceived(null); //Able to reuse this here
+                _this3.props.currentUserReceived(null); //Able to reuse this here
             });
         }
     }, {
@@ -14325,7 +14319,7 @@ var Account = function (_Component) {
     }, {
         key: 'register',
         value: function register(event) {
-            var _this5 = this;
+            var _this4 = this;
 
             event.preventDefault();
             console.log('register: ' + JSON.stringify(this.state.profile));
@@ -14356,7 +14350,7 @@ var Account = function (_Component) {
                     return;
                 }
                 console.log(JSON.stringify(response));
-                _this5.props.currentUserReceived(response.user); //Able to reuse this here
+                _this4.props.currentUserReceived(response.user); //Able to reuse this here
             });
         }
     }, {
@@ -14514,25 +14508,20 @@ var Comments = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Comments.__proto__ || Object.getPrototypeOf(Comments)).call(this));
 
         _this.state = {};
+        _this.checkForComments.bind(_this);
         return _this;
     }
 
-    /*Override Function -- Triggered By Change In the Store(Redux Changes State Form Store)*/
-
-
     _createClass(Comments, [{
-        key: 'componentDidUpdate',
-        value: function componentDidUpdate() {
+        key: 'checkForComments',
+        value: function checkForComments() {
             var _this2 = this;
 
-            //console.log('Comments Container: componentDidUpdate')
             var zone = this.props.zones[this.props.index];
             if (zone == null) {
                 console.log('NO SELECTED ZONE');
                 return;
             }
-            //Stop Duplicate Downloads of Comments from API
-            //If the Key List At the Current Key is Not Null, it Has Already Been Downloaded
             var commentsArray = this.props.commentsMap[zone._id];
             if (commentsArray != null) {
                 return;
@@ -14545,6 +14534,16 @@ var Comments = function (_Component) {
                 var comments = response.results;
                 _this2.props.commentsReceived(comments, zone);
             });
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.checkForComments();
+        }
+    }, {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            this.checkForComments();
         }
     }, {
         key: 'submitComment',
@@ -14895,12 +14894,13 @@ var Profile = function (_Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             var profile = this.props.profiles[this.props.username]; //Taken From The Map
-            console.log('Profile Container: ' + JSON.stringify(profile));
-            if (profile == null) {
-                //Fetch the profile if it has not already been downloaded
-                console.log('Profile Container Fetching Profile...');
-                this.props.fetchProfile({ username: this.props.username });
+            if (profile != null) {
+                //rendered server side
+                console.log('Profile Already Existed: ' + JSON.stringify(profile));
+                return;
             }
+            console.log('Fetching the user profile...');
+            this.props.fetchProfile({ username: this.props.username });
         }
     }, {
         key: 'render',
@@ -14950,7 +14950,8 @@ var Profile = function (_Component) {
 var stateToProps = function stateToProps(state) {
     //state may also be known as store...convention to call state
     return {
-        profiles: state.profile.map,
+        comments: state.comment.map, //State Map of comments
+        profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     };
 };
@@ -15014,11 +15015,15 @@ var Zones = function (_Component) {
         return _this;
     }
 
+    //API Request moved to server side rendering
+
+
     _createClass(Zones, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            //console.log('Zones componentDidMount: ')
-            this.props.fetchZones(null);
+            console.log('Zones componentDidMount: ');
+            console.log('APPLICATION_STATE (Zones container): ' + this.props.appStatus);
+            //this.props.fetchZones(null)
             //Removed API call from here and put it into actions: fetchZones
         }
     }, {
@@ -15846,7 +15851,8 @@ Object.defineProperty(exports, "__esModule", {
 var _constants = __webpack_require__(34);
 
 var initialState = {
-    map: {}
+    map: {},
+    profileMap: {}
 };
 
 exports.default = function () {
@@ -15872,6 +15878,9 @@ exports.default = function () {
             updatedMap[action.zone._id] = zoneComments;
             updated['map'] = updatedMap;
             //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
+
+            var profileComments = updated[action.zone.author._id];
+
             return updated;
 
         case _constants.constants.COMMENT_CREATED:
@@ -15975,10 +15984,12 @@ exports.default = function () {
             updatedMap[action.profile.username] = action.profile;
             updated['map'] = updatedMap;
             updated['appStatus'] = 'ready';
+            console.log('APPLICATION_STATE (profileReducer): ready');
             return updated;
 
         case _constants.constants.APPLICATION_STATE:
-            console.log('APPLICATION_STATE: ' + action.status);
+            if (action.reducer != 'profileReducer') return updated;
+            console.log('APPLICATION_STATE (profileReducer): ' + action.status);
             updated['appStatus'] = action.status;
             return updated;
 
@@ -16019,6 +16030,7 @@ exports.default = function () {
             console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones));
             updated['list'] = action.zones;
             updated['appStatus'] = 'ready';
+            console.log('APPLICATION_STATE (zoneReducer): ready');
             return updated; //this.setState()
 
         case _constants.constants.ZONE_CREATED:
@@ -16035,7 +16047,8 @@ exports.default = function () {
             return updated;
 
         case _constants.constants.APPLICATION_STATE:
-            console.log('APPLICATION_STATE ' + action.status);
+            if (action.reducer != 'zoneReducer') return updated;
+            console.log('APPLICATION_STATE (zoneReducer): ' + action.status);
             updated['appStatus'] = action.status;
             return updated;
 

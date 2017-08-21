@@ -12,13 +12,12 @@ class Profile extends Component{
 
     componentDidMount(){
         const profile = this.props.profiles[this.props.username] //Taken From The Map
-        console.log('Profile Container: ' + JSON.stringify(profile))
-        if(profile == null) {
-            //Fetch the profile if it has not already been downloaded
-            console.log('Profile Container Fetching Profile...')
-            this.props.fetchProfile({username: this.props.username})
+        if(profile != null){ //rendered server side
+            console.log('Profile Already Existed: ' + JSON.stringify(profile))
+            return
         }
-
+        console.log('Fetching the user profile...')
+        this.props.fetchProfile({username: this.props.username})
     }
 
     render(){
@@ -49,7 +48,8 @@ class Profile extends Component{
 /*State Variables To Properties*/
 const stateToProps = (state) => { //state may also be known as store...convention to call state
     return{
-        profiles: state.profile.map,
+        comments: state.comment.map, //State Map of comments
+        profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     }
 }

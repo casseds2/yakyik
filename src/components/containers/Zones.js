@@ -12,9 +12,11 @@ class Zones extends Component{
         }
     }
 
+    //API Request moved to server side rendering
     componentDidMount(){
-        //console.log('Zones componentDidMount: ')
-        this.props.fetchZones(null)
+        console.log('Zones componentDidMount: ')
+        console.log('APPLICATION_STATE (Zones container): ' + this.props.appStatus)
+        //this.props.fetchZones(null)
         //Removed API call from here and put it into actions: fetchZones
     }
 

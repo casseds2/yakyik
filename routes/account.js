@@ -2,7 +2,7 @@ var express = require('express')
 var router = express.Router()
 var ProfileController = require('../controllers/ProfileController')
 var AccountController = require('../controllers/AccountController')
-var bcrypt = require('bcrypt')
+//var bcrypt = require('bcrypt')
 
 router.get('/:action', function(req, res, next){
 
@@ -56,42 +56,55 @@ router.post('/:action', function(req, res, next){
     }
 
     if(action == 'login'){
-        var params = {username: req.body.username} //Params must be passed in as JSON object
-        ProfileController.find(params, function(err, results){
-            if(err){
+        AccountController.login(req)
+            .then(function(result){
+                res.json({
+                    confirmation: 'success',
+                    user: result
+                })
+            })
+            .catch(function(err){
                 res.json({
                     confirmation: 'fail',
                     message: err.message
-                });
-                return
-            }
-
-            if(results.length == 0){
-                res.json({
-                    confirmation:'fail',
-                    message: 'Username Does Not Exist. Check Your Spelling.'
                 })
-                return
-            }
-
-
-            var profile = results[0]
-            var isPasswordCorrect = bcrypt.compareSync(req.body.password, profile.password)
-            if(isPasswordCorrect == false){
-                res.json({
-                    confirmation: 'fail',
-                    message: 'Wrong Password'
-                })
-                return
-            }
-
-            req.session.user = profile._id
-
-            res.json({
-                confirmation: 'success',
-                user: profile
             })
-        })
+        // var params = {username: req.body.username} //Params must be passed in as JSON object
+        // ProfileController.find(params, function(err, results){
+        //     if(err){
+        //         res.json({
+        //             confirmation: 'fail',
+        //             message: err.message
+        //         });
+        //         return
+        //     }
+        //
+        //     if(results.length == 0){
+        //         res.json({
+        //             confirmation:'fail',
+        //             message: 'Username Does Not Exist. Check Your Spelling.'
+        //         })
+        //         return
+        //     }
+        //
+        //
+        //     var profile = results[0]
+        //     var isPasswordCorrect = bcrypt.compareSync(req.body.password, profile.password)
+        //     if(isPasswordCorrect == false){
+        //         res.json({
+        //             confirmation: 'fail',
+        //             message: 'Wrong Password'
+        //         })
+        //         return
+        //     }
+        //
+        //     req.session.user = profile._id
+        //
+        //     res.json({
+        //         confirmation: 'success',
+        //         user: profile
+        //     })
+        // })
     }
 })
 

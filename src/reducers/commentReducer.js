@@ -1,7 +1,8 @@
 import { constants } from '../constants'
 
 var initialState = {
-    map: {}
+    map: {},
+    profileMap: {}
 }
 
 export default (state = initialState, action) => {
@@ -25,6 +26,9 @@ export default (state = initialState, action) => {
             updatedMap[action.zone._id] = zoneComments
             updated['map'] = updatedMap
             //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
+
+            let profileComments = updated[action.zone.author._id]
+
             return updated
 
         case constants.COMMENT_CREATED:

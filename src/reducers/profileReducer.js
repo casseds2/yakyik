@@ -16,10 +16,13 @@ export default (state = initialState, action) => {
             updatedMap[action.profile.username] = action.profile
             updated['map'] = updatedMap
             updated['appStatus'] = 'ready'
+            console.log('APPLICATION_STATE (profileReducer): ready')
             return updated
 
         case constants.APPLICATION_STATE:
-            console.log('APPLICATION_STATE: ' + action.status)
+            if(action.reducer != 'profileReducer')
+                return updated
+            console.log('APPLICATION_STATE (profileReducer): ' + action.status)
             updated['appStatus'] = action.status
             return updated
 

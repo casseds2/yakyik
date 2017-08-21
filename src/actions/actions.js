@@ -15,7 +15,8 @@ export default {
 
             dispatch({
                 type: constants.APPLICATION_STATE,
-                status: 'loading'
+                status: 'loading',
+                reducer: 'zoneReducer'
             })
 
             APIManager.get('/api/zone', params, (err, response) => {
@@ -105,7 +106,8 @@ export default {
         return (dispatch) => {
             dispatch({
                 type: constants.APPLICATION_STATE,
-                status: 'loading'
+                status: 'loading',
+                reducer: 'profileReducer'
             })
             APIManager.get('/api/profile', params, (err, response) => {
                 if(err){

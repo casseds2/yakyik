@@ -41,17 +41,9 @@ var Account = (function (Component) {
 
     _prototypeProperties(Account, null, {
         componentDidMount: {
-            value: function componentDidMount() {
-                var _this = this;
-                APIManager.get("/account/currentuser", null, function (err, response) {
-                    if (err) {
-                        //alert(err.message) //Not Logged In Error
-                        return;
-                    }
-                    //console.log('Account Component Did Mount: ' + JSON.stringify(response))
-                    _this.props.currentUserReceived(response.user);
-                });
-            },
+
+            //Check for if user logged in moved to Server Side
+            value: function componentDidMount() {},
             writable: true,
             configurable: true
         },

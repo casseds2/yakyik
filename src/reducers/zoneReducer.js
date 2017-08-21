@@ -16,6 +16,7 @@ export default (state = initialState, action) => {
             console.log('ZONES_RECEIVED: ' + JSON.stringify(action.zones))
             updated['list'] = action.zones
             updated['appStatus'] = 'ready'
+            console.log('APPLICATION_STATE (zoneReducer): ready')
             return updated //this.setState()
 
         case constants.ZONE_CREATED:
@@ -32,7 +33,9 @@ export default (state = initialState, action) => {
             return updated
 
         case constants.APPLICATION_STATE:
-            console.log('APPLICATION_STATE ' + action.status)
+            if(action.reducer != 'zoneReducer')
+                return updated
+            console.log('APPLICATION_STATE (zoneReducer): ' + action.status)
             updated['appStatus'] = action.status
             return updated
 
