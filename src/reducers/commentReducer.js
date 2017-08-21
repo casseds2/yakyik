@@ -9,25 +9,34 @@ export default (state = initialState, action) => {
 
     var updated = Object.assign({}, state)
     var updatedMap = Object.assign([], updated.map)
+    let updatedProfileMap = Object.assign({}, updated.profileMap)
 
     switch(action.type) {
 
         case constants.COMMENTS_RECEIVED:
-            let zoneComments = updatedMap[action.zone._id]
-            if(zoneComments == null){
-                zoneComments = []
-            }
-            else {
-                zoneComments = Object.assign([], zoneComments)
+
+            if(action.zone != null) {
+                let zoneComments = updatedMap[action.zone._id]
+                if (zoneComments == null) {
+                    zoneComments = []
+                }
+                else {
+                    zoneComments = Object.assign([], zoneComments)
+                }
+                action.comments.forEach((comment, i) => {
+                    zoneComments.push(comment)
+                })
+                updatedMap[action.zone._id] = zoneComments
+                updated['map'] = updatedMap
+                //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
             }
             action.comments.forEach((comment, i) => {
-                zoneComments.push(comment)
+                let profileComments = (updatedProfileMap[comment.author.id]) ? updatedProfileMap[comment.author.id] : []
+                profileComments.push(comment)
+                updatedProfileMap[comment.author.id] = profileComments
             })
-            updatedMap[action.zone._id] = zoneComments
-            updated['map'] = updatedMap
-            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
-
-            let profileComments = updated[action.zone.author._id]
+            updated['profileMap'] = updatedProfileMap
+            console.log('PROFILE_MAP: ' + JSON.stringify(updatedProfileMap))
 
             return updated
 

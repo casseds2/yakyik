@@ -14,6 +14,7 @@ class Profile extends Component{
         const profile = this.props.profiles[this.props.username] //Taken From The Map
         if(profile != null){ //rendered server side
             console.log('Profile Already Existed: ' + JSON.stringify(profile))
+            this.props.fetchComments({'author.id': profile._id})
             return
         }
         console.log('Fetching the user profile...')
@@ -25,6 +26,12 @@ class Profile extends Component{
         let profile = this.props.profiles[this.props.username]
         let header = null
         if(profile != null){
+
+            const comments = (this.props.comments[profile._id]) ? this.props.comments[profile._id] : []
+            const list = comments.map((comment, i) => {
+                return(<li key={i}>{comment.body}</li>)
+            })
+
             header = (
                 <div>
                     <h3>{profile.username}</h3>
@@ -32,6 +39,10 @@ class Profile extends Component{
                         gender: {profile.gender} <br />
                         city: {profile.city} <br />
                     </p>
+                    <h2>Comments</h2>
+                    <ol>
+                        { list }
+                    </ol>
                 </div>
             )
         }
@@ -48,7 +59,7 @@ class Profile extends Component{
 /*State Variables To Properties*/
 const stateToProps = (state) => { //state may also be known as store...convention to call state
     return{
-        comments: state.comment.map, //State Map of comments
+        comments: state.comment.profileMap, //State Map of comments
         profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     }
@@ -58,7 +69,8 @@ const stateToProps = (state) => { //state may also be known as store...conventio
 const dispatchToProps = (dispatch) => {
     return{
         fetchProfile: (params) => dispatch(actions.fetchProfile(params)),
-        profileReceived: (profile) => dispatch(actions.profileReceived(profile))
+        profileReceived: (profile) => dispatch(actions.profileReceived(profile)),
+        fetchComments: (params) => dispatch(actions.fetchComments(params))
     }
 }
 

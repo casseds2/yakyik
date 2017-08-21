@@ -14005,6 +14005,28 @@ exports.default = {
         };
     },
 
+    fetchComments: function fetchComments(params) {
+        return function (dispatch) {
+            // dispatch({
+            //     type: constants.APPLICATION_STATE,
+            //     status: 'loading',
+            //     reducer: 'commentReducer'
+            // })
+            _utils.APIManager.get('/api/comment', params, function (err, response) {
+                if (err) {
+                    alert(err);
+                    return;
+                }
+                console.log('fetchComments: ' + JSON.stringify(response));
+                var comments = response.results;
+                dispatch({
+                    type: _constants.constants.COMMENTS_RECEIVED,
+                    comments: comments
+                });
+            });
+        };
+    },
+
     fetchZones: function fetchZones(params) {
         return function (dispatch) {
 
@@ -14897,6 +14919,7 @@ var Profile = function (_Component) {
             if (profile != null) {
                 //rendered server side
                 console.log('Profile Already Existed: ' + JSON.stringify(profile));
+                this.props.fetchComments({ 'author.id': profile._id });
                 return;
             }
             console.log('Fetching the user profile...');
@@ -14909,6 +14932,16 @@ var Profile = function (_Component) {
             var profile = this.props.profiles[this.props.username];
             var header = null;
             if (profile != null) {
+
+                var comments = this.props.comments[profile._id] ? this.props.comments[profile._id] : [];
+                var list = comments.map(function (comment, i) {
+                    return _react2.default.createElement(
+                        'li',
+                        { key: i },
+                        comment.body
+                    );
+                });
+
                 header = _react2.default.createElement(
                     'div',
                     null,
@@ -14928,6 +14961,16 @@ var Profile = function (_Component) {
                         profile.city,
                         ' ',
                         _react2.default.createElement('br', null)
+                    ),
+                    _react2.default.createElement(
+                        'h2',
+                        null,
+                        'Comments'
+                    ),
+                    _react2.default.createElement(
+                        'ol',
+                        null,
+                        list
                     )
                 );
             }
@@ -14950,7 +14993,7 @@ var Profile = function (_Component) {
 var stateToProps = function stateToProps(state) {
     //state may also be known as store...convention to call state
     return {
-        comments: state.comment.map, //State Map of comments
+        comments: state.comment.profileMap, //State Map of comments
         profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     };
@@ -14964,6 +15007,9 @@ var dispatchToProps = function dispatchToProps(dispatch) {
         },
         profileReceived: function profileReceived(profile) {
             return dispatch(_actions.actions.profileReceived(profile));
+        },
+        fetchComments: function fetchComments(params) {
+            return dispatch(_actions.actions.fetchComments(params));
         }
     };
 };
@@ -15862,24 +15908,33 @@ exports.default = function () {
 
     var updated = Object.assign({}, state);
     var updatedMap = Object.assign([], updated.map);
+    var updatedProfileMap = Object.assign({}, updated.profileMap);
 
     switch (action.type) {
 
         case _constants.constants.COMMENTS_RECEIVED:
-            var zoneComments = updatedMap[action.zone._id];
-            if (zoneComments == null) {
-                zoneComments = [];
-            } else {
-                zoneComments = Object.assign([], zoneComments);
+
+            if (action.zone != null) {
+                var zoneComments = updatedMap[action.zone._id];
+                if (zoneComments == null) {
+                    zoneComments = [];
+                } else {
+                    zoneComments = Object.assign([], zoneComments);
+                }
+                action.comments.forEach(function (comment, i) {
+                    zoneComments.push(comment);
+                });
+                updatedMap[action.zone._id] = zoneComments;
+                updated['map'] = updatedMap;
+                //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
             }
             action.comments.forEach(function (comment, i) {
-                zoneComments.push(comment);
+                var profileComments = updatedProfileMap[comment.author.id] ? updatedProfileMap[comment.author.id] : [];
+                profileComments.push(comment);
+                updatedProfileMap[comment.author.id] = profileComments;
             });
-            updatedMap[action.zone._id] = zoneComments;
-            updated['map'] = updatedMap;
-            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
-
-            var profileComments = updated[action.zone.author._id];
+            updated['profileMap'] = updatedProfileMap;
+            console.log('PROFILE_MAP: ' + JSON.stringify(updatedProfileMap));
 
             return updated;
 

@@ -10,6 +10,28 @@ export default {
         }
     },
 
+    fetchComments: (params) => {
+        return (dispatch) => {
+            // dispatch({
+            //     type: constants.APPLICATION_STATE,
+            //     status: 'loading',
+            //     reducer: 'commentReducer'
+            // })
+            APIManager.get('/api/comment', params, (err, response) => {
+                if(err){
+                    alert(err)
+                    return
+                }
+                console.log('fetchComments: ' + JSON.stringify(response))
+                const comments = response.results
+                dispatch({
+                    type: constants.COMMENTS_RECEIVED,
+                    comments: comments
+                })
+            })
+        }
+    },
+
     fetchZones: (params) => {
         return(dispatch) => {
 
