@@ -6,7 +6,10 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "^1.0.2",
+    "bluebird": "^3.5.0",
     "body-parser": "~1.17.1",
+    "client-sessions": "^0.8.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.3",
     "express": "~4.15.2",
@@ -15,10 +18,14 @@
     "morgan": "~1.8.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "react-dropzone": "^3.13.3",
     "react-redux": "^5.0.5",
+    "react-router": "^3.0.5",
+    "react-router-dom": "^4.1.1",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
     "serve-favicon": "~2.4.2",
+    "sha1": "^1.1.1",
     "superagent": "^3.5.2"
   },
   "devDependencies": {

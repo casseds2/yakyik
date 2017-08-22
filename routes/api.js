@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var ZoneController = require('../controllers/ZoneController');
 var controllers = require('../controllers')
 
 router.get('/:resource', function(req, res, next){
@@ -75,6 +74,36 @@ router.post('/:resource', function(req, res, next){
     }
 
     controller.create(req.body, function(err, result){
+        if(err){
+            res.json({
+                confirmation: 'fail',
+                message: err
+            });
+            return
+        }
+
+        res.json({
+            confirmation: 'success',
+            results:result
+        })
+    })
+});
+
+router.put('/:resource/:id', function(req, res, next){
+    var resource = req.params.resource;
+    var controller = controllers[resource]
+
+    if(controller == null){
+        res.json({
+            confirmation: 'fail',
+            message: 'Invalid Resource Request: ' + resource
+        })
+        return
+    }
+
+    var id = req.params.id
+
+    controller.update(id, req.body, function(err, result){
         if(err){
             res.json({
                 confirmation: 'fail',

@@ -1,28 +1,23 @@
 import React, { Component } from 'react'
 import {Zone, CreateZone} from '../presentation'
 import {APIManager} from '../../utils'
+import { connect } from 'react-redux'
+import { actions } from '../../actions'
 
 class Zones extends Component{
 
     constructor(){
         super()
         this.state = {
-            list: [],
-            selected: 0
         }
     }
 
+    //API Request moved to server side rendering
     componentDidMount(){
         console.log('Zones componentDidMount: ')
-        APIManager.get('/api/zone', null, (err, response) => {
-            if(err){
-                alert('ERROR: ' + err.message)
-                return
-            }
-            this.setState({
-                list: response.results
-            })
-        })
+        console.log('APPLICATION_STATE (Zones container): ' + this.props.appStatus)
+        //this.props.fetchZones(null)
+        //Removed API call from here and put it into actions: fetchZones
     }
 
     submitZone(zone){
@@ -33,25 +28,20 @@ class Zones extends Component{
                 return
             }
             console.log('ZONE CREATED: ' + JSON.stringify(response))
-            let updatedList = Object.assign([], this.state.list)
-            updatedList.push(response.results)
-            this.setState({
-                list: updatedList
-            })
+            //Dispatch An Action
+            const zone = response.results
+            this.props.zoneCreated(zone)
         })
     }
 
     selectZone(index){
-        console.log('selectZone: ' + index)
-        this.setState({
-            selected: index
-        })
+        this.props.selectedZone(index)
     }
 
     render(){
 
-        const listItems = this.state.list.map((zone, i) => {
-            let selected = (i==this.state.selected)
+        const listItems = this.props.list.map((zone, i) => {
+            let selected = (i==this.props.selected)
             return (
                 <li key={i}>
                     <Zone index={i} select={this.selectZone.bind(this)}isSelected={selected} currentZone={zone}/>
@@ -59,15 +49,48 @@ class Zones extends Component{
             )
         })
 
+        let content = null
+        if(this.props.appStatus == 'loading'){
+            content = 'LOADING...'
+        }
+        else{
+            content = (
+                <div>
+                    <ol>
+                        {listItems}
+                    </ol>
+                    <CreateZone onCreate={this.submitZone.bind(this)}/>
+                </div>
+            )
+        }
+
         return(
             <div>
-                <ol>
-                    {listItems}
-                </ol>
-                <CreateZone onCreate={this.submitZone.bind(this)}/>
+                { content }
             </div>
         )
     }
 }
 
-export default Zones
+/*The following are properties (props)*/
+
+//This allows us use this.props.list...assigns state to property
+const stateToProps = (state) => { //state here also knows as store
+    return{
+        appStatus: state.zone.appStatus,
+        list: state.zone.list,
+        selected: state.zone.selectedZone
+    }
+}
+
+//Bad form to reference store directly so we use this function
+const dispatchToProps = (dispatch) => {
+    return{
+        zonesReceived: (zones) => dispatch(actions.zonesReceived(zones)),
+        zoneCreated: (zone) => dispatch(actions.zoneCreated(zone)),
+        selectedZone: (index) => dispatch(actions.selectedZone(index)),
+        fetchZones: (params) => dispatch(actions.fetchZones(params))
+    }
+}
+
+export default connect(stateToProps, dispatchToProps)(Zones)

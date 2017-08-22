@@ -2,43 +2,64 @@ import React, { Component } from 'react'
 import { CreateComment, Comment } from '../presentation'
 import styles from './styles'
 import {APIManager} from '../../utils'
+import { actions } from '../../actions'
+import { connect } from 'react-redux'
 
 class Comments extends Component{
 
     constructor(){
         super()
         this.state = {
-            list: []
         }
+        this.checkForComments.bind(this)
+    }
+
+    checkForComments(){
+        let zone = this.props.zones[this.props.index]
+        if(zone == null){
+            console.log('NO SELECTED ZONE')
+            return
+        }
+        let commentsArray = this.props.commentsMap[zone._id]
+        if(commentsArray != null){
+            return
+        }
+        this.props.fetchComments({zone: zone._id})
     }
 
     componentDidMount(){
-        console.log('Comments componentDidMount: ')
-        APIManager.get('/api/comment', null, (err, response) => {
-            if(err){
-                alert('ERROR: ' + err.message)
-                return
-            }
-            //console.log('RESULTS: ' + JSON.stringify(response.results))
-            this.setState({
-                list: response.results
-            })
-        })
+        this.checkForComments()
+    }
+
+    componentDidUpdate(){
+        this.checkForComments()
     }
 
     submitComment(comment){
-        console.log('submitComment: ' + JSON.stringify(comment))
-        //let updatedComment = Object.assign({}, comment)
-        APIManager.post('/api/comment', comment, (err, response) => {
+        if(this.props.user == null){
+            alert('Please Sign Up or Log In To Comment')
+            return
+        }
+        let updatedComment = Object.assign({}, comment)
+        //Assign Zone Property of Currently Selected Zone
+        let zone = this.props.zones[this.props.index]
+        updatedComment['zone'] = zone._id
+        updatedComment['username'] = this.props.user.username
+        console.log('submitComment: ' + JSON.stringify(updatedComment))
+        updatedComment['author'] = {
+            id: this.props.user._id,
+            username: this.props.user.username,
+            image:this.props.user.image
+        }
+        APIManager.post('/api/comment', updatedComment, (err, response) => {
             if(err){
                 alert('ERROR: ' + err.message)
                 return
             }
-            let updatedList = Object.assign([], this.state.list)
-            updatedList.push(response.results)
-            this.setState({
-                list: updatedList
-            })
+            let updatedComment = response.results
+            this.props.commentCreated(updatedComment)
+            //Could also use this approach, re-uses code and is elegant
+            //this.props.commentsReceived([updatedComment], zone)
         })
     }
 
@@ -51,22 +72,43 @@ class Comments extends Component{
         })
     }
 
+    updateComment(comment, updatedBody){
+        console.log('updateComment: ' + comment._id + ', ' + updatedBody)
+        //Want to Update the Comment in Database Here
+        this.props.updateComment(comment, {body: updatedBody})
+    }
+
     render(){
+        const selectedZone = this.props.zones[this.props.index]
+        const currentUser = this.props.user //null if not logged in
+        let zoneName = null
+        let commentList = null
+
+
+        if(selectedZone != null) {
+            zoneName = selectedZone.name
+            let zoneComments = this.props.commentsMap[selectedZone._id]
+            if (zoneComments != null) {
+                commentList = zoneComments.map((comment, i) => {
+                    let editable = false
+                    if(currentUser != null){
+                        if(currentUser._id == comment.author.id)
+                            editable = true
+                    }
+                    return (
+                        <li key={i}><Comment onUpdate={this.updateComment.bind(this)} isEditable={editable} currentComment={comment}/></li>
+                    )
+                })
+            }
+        }
 
         const commentsStyle = styles.comment
-
-        const listItems = this.state.list.map((comment, i) => {
-            return (
-                <li key={i}><Comment currentComment={comment}/></li>
-            )
-        })
-
         return(
             <div>
-                <h2>Zone 1 Comments</h2>
+                <h2> {zoneName} </h2>
                 <div style={commentsStyle.commentsBox}>
                     <ul style={commentsStyle.commentsList}>
-                        {listItems}
+                        {commentList}
                     </ul>
                     <CreateComment onCreate={this.submitComment.bind(this)}/>
                 </div>
@@ -75,4 +117,25 @@ class Comments extends Component{
     }
 }
 
-export default Comments
+/*State Variables To Properties*/
+const stateToProps = (state) => { //state may also be known as store...convention to call state
+    return{
+        commentsMap: state.comment.map,
+        commentsLoaded: state.comment.commentsLoaded,
+        index: state.zone.selectedZone,
+        zones: state.zone.list,
+        user: state.account.user
+    }
+}
+
+/*Store Variables To Properties*/
+const dispatchToProps = (dispatch) => {
+    return{
+        commentsReceived: (comments, zone) => dispatch(actions.commentsReceived(comments, zone)),
+        commentCreated: (comment) => dispatch(actions.commentCreated(comment)),
+        updateComment: (comment, params) => dispatch(actions.updateComment(comment, params)),
+        fetchComments: (params) => dispatch(actions.fetchComments(params))
+    }
+}
+
+export default connect(stateToProps, dispatchToProps) (Comments)
