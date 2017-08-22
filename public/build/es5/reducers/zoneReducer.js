@@ -38,6 +38,7 @@ module.exports = function (_x, action) {
             return updated;
 
         case constants.APPLICATION_STATE:
+            if (action.reducer != "zoneReducer") return updated;
             console.log("APPLICATION_STATE (zoneReducer): " + action.status);
             updated.appStatus = action.status;
             return updated;

@@ -14012,7 +14012,7 @@ exports.default = {
                     alert(err);
                     return;
                 }
-                console.log('fetchComments: ' + JSON.stringify(response));
+                //console.log('fetchComments: ' + JSON.stringify(response))
                 var comments = response.results;
                 dispatch({
                     type: _constants.constants.COMMENTS_RECEIVED,
@@ -14543,14 +14543,6 @@ var Comments = function (_Component) {
                 return;
             }
             this.props.fetchComments({ zone: zone._id });
-            // APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
-            //     if(err){
-            //         alert('ERROR: ' + err.message)
-            //         return
-            //     }
-            //     let comments = response.results
-            //     this.props.commentsReceived(comments, zone)
-            // })
         }
     }, {
         key: 'componentDidMount',
@@ -14915,11 +14907,21 @@ var Profile = function (_Component) {
             var profile = this.props.profiles[this.props.username]; //Taken From The Map
             if (profile == null) {
                 //rendered server side
-                console.log('Fetching the user profile...');
+                //console.log('Fetching the user profile...')
                 this.props.fetchProfile({ username: this.props.username });
                 return;
             }
-            console.log('Profile Already Existed: ' + JSON.stringify(profile));
+            //console.log('Profile Already Existed: ' + JSON.stringify(profile))
+            if (this.props.comments[profile._id] != null) return;
+            this.props.fetchComments({ 'author.id': profile._id });
+        }
+    }, {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            //console.log('componentDidUpdate (Profile): ')
+            var profile = this.props.profiles[this.props.username];
+            if (profile == null || this.props.comments[profile._id] != null) return;
+            //Look for comments if not already loaded
             this.props.fetchComments({ 'author.id': profile._id });
         }
     }, {
@@ -15903,43 +15905,24 @@ exports.default = function () {
 
 
     var updated = Object.assign({}, state);
-    var updatedMap = Object.assign([], updated.map);
+    var updatedMap = Object.assign({}, updated.map);
     //let updatedProfileMap = Object.assign({}, updated.profileMap)
 
     switch (action.type) {
 
         case _constants.constants.COMMENTS_RECEIVED:
-
-            console.log('COMMENTS_RECEIVED: ' + JSON.stringify(action.comments));
-            console.log('PARAMS: ' + JSON.stringify(action.params));
-
             var keys = Object.keys(action.params);
-            console.log('KEY: ' + keys[0]);
-
-            action.comments;
-            // if(action.zone != null) {
-            //     let zoneComments = updatedMap[action.zone._id]
-            //     if (zoneComments == null) {
-            //         zoneComments = []
-            //     }
-            //     else {
-            //         zoneComments = Object.assign([], zoneComments)
-            //     }
-            //     action.comments.forEach((comment, i) => {
-            //         zoneComments.push(comment)
-            //     })
-            //     updatedMap[action.zone._id] = zoneComments
-            //     updated['map'] = updatedMap
-            //     //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
-            // }
-            // action.comments.forEach((comment, i) => {
-            //     let profileComments = (updatedProfileMap[comment.author.id]) ? updatedProfileMap[comment.author.id] : []
-            //     profileComments.push(comment)
-            //     updatedProfileMap[comment.author.id] = profileComments
-            // })
-            // updated['profileMap'] = updatedProfileMap
-            // console.log('PROFILE_MAP: ' + JSON.stringify(updatedProfileMap))
-
+            var key = keys[0]; //Key is the zone
+            var value = action.params[key]; //This is the zone id number
+            //console.log('KEY: ' + key)
+            //console.log('VALUE: ' + value)
+            var commentsArray = [];
+            action.comments.forEach(function (comment, i) {
+                commentsArray.push(comment);
+            });
+            if (commentsArray == []) updatedMap[value] = [];else updatedMap[value] = commentsArray;
+            updated['map'] = updatedMap;
+            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updatedMap))
             return updated;
 
         case _constants.constants.COMMENT_CREATED:

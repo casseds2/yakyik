@@ -31,12 +31,14 @@ var Profile = (function (Component) {
         componentDidMount: {
             value: function componentDidMount() {
                 var profile = this.props.profiles[this.props.username]; //Taken From The Map
-                console.log("Profile Container: " + JSON.stringify(profile));
-                if (profile != null) {
+                if (profile == null) {
+                    //rendered server side
+                    console.log("Fetching the user profile...");
+                    this.props.fetchProfile({ username: this.props.username });
                     return;
                 }
-                console.log("Fetching the user profile...");
-                this.props.fetchProfile({ username: this.props.username });
+                console.log("Profile Already Existed: " + JSON.stringify(profile));
+                this.props.fetchComments({ "author.id": profile._id });
             },
             writable: true,
             configurable: true
@@ -46,6 +48,15 @@ var Profile = (function (Component) {
                 var profile = this.props.profiles[this.props.username];
                 var header = null;
                 if (profile != null) {
+                    var comments = this.props.comments[profile._id] ? this.props.comments[profile._id] : [];
+                    var list = comments.map(function (comment, i) {
+                        return React.createElement(
+                            "li",
+                            { key: i },
+                            comment.body
+                        );
+                    });
+
                     header = React.createElement(
                         "div",
                         null,
@@ -65,6 +76,16 @@ var Profile = (function (Component) {
                             profile.city,
                             " ",
                             React.createElement("br", null)
+                        ),
+                        React.createElement(
+                            "h2",
+                            null,
+                            "Comments"
+                        ),
+                        React.createElement(
+                            "ol",
+                            null,
+                            list
                         )
                     );
                 }
@@ -88,7 +109,8 @@ var Profile = (function (Component) {
 var stateToProps = function (state) {
     //state may also be known as store...convention to call state
     return {
-        profiles: state.profile.map,
+        comments: state.comment.map, //State Map of comments
+        profiles: state.profile.map, //State Map of profiles
         appStatus: state.profile.appStatus
     };
 };
@@ -101,6 +123,9 @@ var dispatchToProps = function (dispatch) {
         },
         profileReceived: function (profile) {
             return dispatch(actions.profileReceived(profile));
+        },
+        fetchComments: function (params) {
+            return dispatch(actions.fetchComments(params));
         }
     };
 };

@@ -12,23 +12,24 @@ module.exports = function (_x, action) {
 
 
     var updated = Object.assign({}, state);
-    var updatedMap = Object.assign([], updated.map);
+    var updatedMap = Object.assign({}, updated.map);
+    //let updatedProfileMap = Object.assign({}, updated.profileMap)
 
     switch (action.type) {
 
         case constants.COMMENTS_RECEIVED:
-            var zoneComments = updatedMap[action.zone._id];
-            if (zoneComments == null) {
-                zoneComments = [];
-            } else {
-                zoneComments = Object.assign([], zoneComments);
-            }
+            var keys = Object.keys(action.params);
+            var key = keys[0]; //Key is the zone
+            var value = action.params[key]; //This is the zone id number
+            console.log("KEY: " + key);
+            console.log("VALUE: " + value);
+            var commentsArray = [];
             action.comments.forEach(function (comment, i) {
-                zoneComments.push(comment);
+                commentsArray.push(comment);
             });
-            updatedMap[action.zone._id] = zoneComments;
+            if (commentsArray == []) updatedMap[value] = [];else updatedMap[value] = commentsArray;
             updated.map = updatedMap;
-            //console.log('COMMENTS_RECEIVED: ' + JSON.stringify(updated))
+            console.log("COMMENTS_RECEIVED: " + JSON.stringify(updatedMap));
             return updated;
 
         case constants.COMMENT_CREATED:

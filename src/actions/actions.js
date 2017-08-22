@@ -17,7 +17,7 @@ export default {
                     alert(err)
                     return
                 }
-                console.log('fetchComments: ' + JSON.stringify(response))
+                //console.log('fetchComments: ' + JSON.stringify(response))
                 const comments = response.results
                 dispatch({
                     type: constants.COMMENTS_RECEIVED,

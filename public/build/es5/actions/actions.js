@@ -11,11 +11,30 @@ module.exports = {
         };
     },
 
+    fetchComments: function (params) {
+        return function (dispatch) {
+            APIManager.get("/api/comment", params, function (err, response) {
+                if (err) {
+                    alert(err);
+                    return;
+                }
+                //console.log('fetchComments: ' + JSON.stringify(response))
+                var comments = response.results;
+                dispatch({
+                    type: constants.COMMENTS_RECEIVED,
+                    comments: comments,
+                    params: params
+                });
+            });
+        };
+    },
+
     fetchZones: function (params) {
         return function (dispatch) {
             dispatch({
                 type: constants.APPLICATION_STATE,
-                status: "loading"
+                status: "loading",
+                reducer: "zoneReducer"
             });
 
             APIManager.get("/api/zone", params, function (err, response) {
@@ -98,7 +117,8 @@ module.exports = {
         return function (dispatch) {
             dispatch({
                 type: constants.APPLICATION_STATE,
-                status: "loading"
+                status: "loading",
+                reducer: "profileReducer"
             });
             APIManager.get("/api/profile", params, function (err, response) {
                 if (err) {

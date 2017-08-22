@@ -25,14 +25,6 @@ class Comments extends Component{
             return
         }
         this.props.fetchComments({zone: zone._id})
-        // APIManager.get('/api/comment', {zone:zone._id}, (err, response) => {
-        //     if(err){
-        //         alert('ERROR: ' + err.message)
-        //         return
-        //     }
-        //     let comments = response.results
-        //     this.props.commentsReceived(comments, zone)
-        // })
     }
 
     componentDidMount(){

@@ -38,7 +38,6 @@ var Comments = (function (Component) {
     _prototypeProperties(Comments, null, {
         checkForComments: {
             value: function checkForComments() {
-                var _this = this;
                 var zone = this.props.zones[this.props.index];
                 if (zone == null) {
                     console.log("NO SELECTED ZONE");
@@ -48,14 +47,7 @@ var Comments = (function (Component) {
                 if (commentsArray != null) {
                     return;
                 }
-                APIManager.get("/api/comment", { zone: zone._id }, function (err, response) {
-                    if (err) {
-                        alert("ERROR: " + err.message);
-                        return;
-                    }
-                    var comments = response.results;
-                    _this.props.commentsReceived(comments, zone);
-                });
+                this.props.fetchComments({ zone: zone._id });
             },
             writable: true,
             configurable: true
@@ -206,8 +198,10 @@ var dispatchToProps = function (dispatch) {
         },
         updateComment: function (comment, params) {
             return dispatch(actions.updateComment(comment, params));
+        },
+        fetchComments: function (params) {
+            return dispatch(actions.fetchComments(params));
         }
-
     };
 };
 

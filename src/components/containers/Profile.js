@@ -13,13 +13,25 @@ class Profile extends Component{
     componentDidMount(){
         let profile = this.props.profiles[this.props.username] //Taken From The Map
         if(profile == null){ //rendered server side
-            console.log('Fetching the user profile...')
+            //console.log('Fetching the user profile...')
             this.props.fetchProfile({username: this.props.username})
             return
         }
-        console.log('Profile Already Existed: ' + JSON.stringify(profile))
+        //console.log('Profile Already Existed: ' + JSON.stringify(profile))
+        if(this.props.comments[profile._id] != null)
+            return
         this.props.fetchComments({'author.id': profile._id})
     }
+
+    componentDidUpdate() {
+        //console.log('componentDidUpdate (Profile): ')
+        let profile = this.props.profiles[this.props.username]
+        if(profile == null || this.props.comments[profile._id] != null)
+            return
+        //Look for comments if not already loaded
+        this.props.fetchComments({'author.id': profile._id})
+    }
+
 
     render(){
 
